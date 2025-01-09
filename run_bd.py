@@ -36,9 +36,9 @@ def draw_bounding_boxes(image_path, results, output_image_path, output_coords_pa
     cv2.imwrite(visualize_image_path, image)
 
 # recording/images 폴더에서 이미지 파일 검색
-image_files = glob.glob('recording/images/*.png')  # 폴더 내의 PNG 이미지 검색
+image_files = glob.glob('road_view/*.png')  # 폴더 내의 PNG 이미지 검색
 if not image_files:
-    print("No image found in the recording/images folder.")
+    print("No image found in the road_view folder.")
     exit(1)
 
 # 폴더에 있는 첫 번째 이미지 파일 사용

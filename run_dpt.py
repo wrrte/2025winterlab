@@ -180,7 +180,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "-i", "--input_path", default="recording/images", help="folder with input images"
+        "-i", "--input_path", default="road_view", help="folder with input images"
     )
 
     parser.add_argument(
