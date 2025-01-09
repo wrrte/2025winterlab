@@ -35,10 +35,10 @@ def draw_bounding_boxes(image_path, results, output_image_path, output_coords_pa
     # 바운딩 박스가 그려진 이미지를 visualize 폴더에 저장
     cv2.imwrite(visualize_image_path, image)
 
-# recording/images 폴더에서 이미지 파일 검색
-image_files = glob.glob('recording/images/*.png')  # 폴더 내의 PNG 이미지 검색
+# roadview 폴더에서 이미지 파일 검색
+image_files = glob.glob('roadview/*.png')  # 폴더 내의 PNG 이미지 검색
 if not image_files:
-    print("No image found in the recording/images folder.")
+    print("No image found in the roadview folder.")
     exit(1)
 
 # 폴더에 있는 첫 번째 이미지 파일 사용
