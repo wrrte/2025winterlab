@@ -32,7 +32,7 @@ if err != sl.ERROR_CODE.SUCCESS:
     exit(1)
 
 # Prepare directories for saving images and coordinates
-record_dir = "recording/images/"
+record_dir = "roadview/"
 os.makedirs(record_dir, exist_ok=True)
 
 # Prepare matrices for images and depth data
