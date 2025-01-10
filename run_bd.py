@@ -46,9 +46,9 @@ source_image_path = image_files[0]
 print(f"Using image: {source_image_path}")
 
 # 결과를 저장할 경로 설정
-output_image_path = 'upgrade_output/new_result.png'
-output_coords_path = 'upgradebb_output/new_result.txt'
-visualize_image_path = 'visualize/new_result_visualized.png'  # visualize 폴더에 저장될 이미지 경로
+output_image_path = 'bd_output/image/new_result.png'
+output_coords_path = 'bd_output/coordinate/new_result.txt'
+visualize_image_path = 'bd_output/visualize/new_result_visualized.png'  # visualize 폴더에 저장될 이미지 경로
 
 # 추론 수행
 results = model(source_image_path)
