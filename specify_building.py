@@ -8,12 +8,12 @@ from geopy.distance import geodesic
 from PIL import Image, ImageDraw, ImageFont
 
 # gps_est.py 스크립트를 실행하고 출력을 캡처
-print("Running gps_est.py to get estimated GPS coordinates...\n")
-result = subprocess.run(["python3", "gps_est.py"], capture_output=True, text=True)
+print("Running calculate_GPS.py to get estimated GPS coordinates...\n")
+result = subprocess.run(["python3", "calculate_GPS.py"], capture_output=True, text=True)
 
 # 출력된 내용을 문자열로 가져옴
 output = result.stdout
-print("Captured output from gps_est.py:\n", output)
+print("Captured output from calculate_GPS.py:\n", output)
 
 # 출력 내용에서 GPS 좌표 부분만 추출
 lines = output.splitlines()
