@@ -216,7 +216,7 @@ if __name__ == "__main__":
     default_models = {
         "midas_v21": "weights/midas_v21-f6b98070.pt",
         "dpt_large": "weights/dpt_large-midas-2f21e586.pt",
-        "dpt_hybrid": "weights/dpt_hybrid-midas-501f0c75.pt",
+        "dpt_hybrid": "weights/dpt_hybrid_origin.pt",
         "dpt_hybrid_kitti": "weights/dpt_hybrid_kitti-cb926ef4.pt",
         "dpt_hybrid_nyu": "weights/dpt_hybrid_nyu-2ce69ec7.pt",
     }
