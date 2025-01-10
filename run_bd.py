@@ -4,7 +4,7 @@ import glob
 import os
 
 # 학습된 모델 로드
-model = YOLOv10("./best.pt")
+model = YOLOv10("./weight/bd_origin.pt")
 
 def draw_bounding_boxes(image_path, results, output_image_path, output_coords_path, visualize_image_path, confidence_threshold=0.3):
     image = cv2.imread(image_path)

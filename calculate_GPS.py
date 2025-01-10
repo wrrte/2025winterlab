@@ -75,11 +75,11 @@ def run_detection_script(detection_script_path):
 
     return detection_points
 
-def run_monodepth_and_get_latest_pfm(pfm_folder_path):
-    # run_monodepth.py 실행
-    result = subprocess.run(['python', 'run_monodepth.py'], capture_output=True, text=True)
+def run_dpt_and_get_latest_pfm(pfm_folder_path):
+    # run_dpt.py 실행
+    result = subprocess.run(['python', 'run_dpt.py'], capture_output=True, text=True)
     if result.returncode != 0:
-        print("run_monodepth.py 실행 중 오류가 발생했습니다.")
+        print("run_dpt.py 실행 중 오류가 발생했습니다.")
         print(result.stderr)
         exit(1)
     
@@ -117,7 +117,7 @@ def predict_detection_points_gps(detection_script_path, pfm_folder_path, record_
         print("참조 지점을 찾을 수 없습니다.")
         return []
 
-    pfm_file_path = run_monodepth_and_get_latest_pfm(pfm_folder_path)
+    pfm_file_path = run_dpt_and_get_latest_pfm(pfm_folder_path)
     depth_map, scale = load_pfm(pfm_file_path)
     height, width = depth_map.shape[:2]
 
@@ -142,8 +142,8 @@ current_gps = (36.370077, 127.379437)  # 현재 GPS 위치 (위도, 경도)
 heading = 180  # 카메라의 현재 바라보는 방향 (서쪽 85도)
 reference_distance = 2.5  # 참조 지점의 실제 거리 (미터)
 FOV = 72  # 화각 72도
-pfm_folder_path = './output_monodepth/'  # PFM 파일이 저장된 폴더 경로
-detection_script_path = './detection.py'  # detection.py 파일 경로
+pfm_folder_path = './dpt_output/'  # PFM 파일이 저장된 폴더 경로
+detection_script_path = './run_bd.py'  # building detection 파일 경로
 record_dir = 'roadview/reference_point'  # 텍스트 파일이 저장된 폴더 경로
 
 predicted_gps_points = predict_detection_points_gps(detection_script_path, pfm_folder_path, record_dir, current_gps, heading, reference_distance, FOV)
