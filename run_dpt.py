@@ -17,7 +17,7 @@ from dpt.transforms import Resize, NormalizeImage, PrepareForNet
 #from util.misc import visualize_attention
 
 
-def run(input_path, output_path, model_path, model_type="dpt_hybrid", optimize=True):
+def run(input_path, output_path, model_path, model_type="dpt_hybrid", optimize=True, cuda_NUM=4):
     """Run MonoDepthNN to compute depth maps.
 
     Args:
@@ -27,8 +27,8 @@ def run(input_path, output_path, model_path, model_type="dpt_hybrid", optimize=T
     """
     print("initialize")
 
-    # select device (set to GPU 4)
-    device = torch.device("cuda:4" if torch.cuda.is_available() else "cpu")
+    # select device (set to GPU cuda_NUM)
+    device = torch.device(f"cuda:{cuda_NUM}" if torch.cuda.is_available() else "cpu")
     print("device: %s" % device)
 
     # load network
@@ -186,7 +186,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-o",
         "--output_path",
-        default="output_monodepth",
+        default="dpt_output",
         help="folder for output images",
     )
 
