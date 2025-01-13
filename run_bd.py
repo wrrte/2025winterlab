@@ -35,25 +35,30 @@ def draw_bounding_boxes(image_path, results, output_image_path, output_coords_pa
     # 바운딩 박스가 그려진 이미지를 visualize 폴더에 저장
     cv2.imwrite(visualize_image_path, image)
 
-# roadview 폴더에서 이미지 파일 검색
-image_files = glob.glob('roadview/image/*.png')  # 폴더 내의 PNG 이미지 검색
+
+# roadview/image 폴더 내의 모든 PNG 이미지 검색
+image_files = glob.glob('roadview/image/*.png')  
 if not image_files:
-    print("No image found in the roadview folder.")
+    print("No images found in the roadview folder.")
     exit(1)
 
-# 폴더에 있는 첫 번째 이미지 파일 사용
-source_image_path = image_files[0]
-print(f"Using image: {source_image_path}")
-
-# 결과를 저장할 경로 설정
-output_image_path = 'bd_output/image/new_result.png'
-output_coords_path = 'bd_output/coordinate/new_result.txt'
-visualize_image_path = 'bd_output/visualize/new_result_visualized.png'  # visualize 폴더에 저장될 이미지 경로
-
-# 추론 수행
-results = model(source_image_path)
-
-# 바운딩 박스를 그려서 이미지와 좌표를 저장 (confidence threshold=0.3 적용)
-draw_bounding_boxes(source_image_path, results, output_image_path, output_coords_path, visualize_image_path, confidence_threshold=0.3)
-
-#branch test
+# 이미지 파일 처리
+for source_image_path in image_files:
+    # 원본 이미지 파일명 추출 (확장자 포함)
+    file_name = os.path.basename(source_image_path)  
+    file_name_without_ext = os.path.splitext(file_name)[0]  # 확장자를 제외한 파일명
+    
+    print(f"Processing image: {source_image_path}")
+    
+    # 결과를 저장할 경로 설정
+    output_image_path = f'bd_output/image/{file_name_without_ext}.png'
+    output_coords_path = f'bd_output/coordinate/{file_name_without_ext}.txt'
+    visualize_image_path = f'bd_output/visualize/{file_name_without_ext}_visualized.png'
+    
+    # 추론 수행
+    results = model(source_image_path)
+    
+    # 바운딩 박스를 그려서 이미지와 좌표를 저장 (confidence threshold=0.3 적용)
+    draw_bounding_boxes(source_image_path, results, output_image_path, output_coords_path, visualize_image_path, confidence_threshold=0.3)
+    
+print("Processing completed for all images.")
