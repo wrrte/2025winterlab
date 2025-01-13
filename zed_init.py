@@ -76,7 +76,7 @@ def capture_image_and_point():
         now = datetime.now()
         formatted_time = now.strftime("%d_%m_%Y_%H_%M_%S_%f")
         filename_str = "image_" + formatted_time + ".jpg"
-        cv2.imwrite(record_dir + filename_str, frame)
+        cv2.imwrite(record_dir + "image/" + filename_str, frame)
 
         # Find a 5m point along the central x-coordinate line in the point cloud
         found_point = False
@@ -97,7 +97,7 @@ def capture_image_and_point():
             # Adjust y-coordinate to account for the 100 pixels cut off
             selected_y = min(selected_y, 1100)
             print(f"5미터 지점 발견: 좌표 ({selected_x}, {selected_y})")
-            coordinates_file = os.path.join(record_dir, filename_str.replace('.jpg', '.txt'))
+            coordinates_file = os.path.join(record_dir + "reference_point/", filename_str.replace('.jpg', '.txt'))
             with open(coordinates_file, 'w') as file:
                 file.write(f"5m point at ({selected_x}, {selected_y})\n")
         else:

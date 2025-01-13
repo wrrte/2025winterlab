@@ -1,10 +1,10 @@
 import cv2
-from ultralytics import YOLOv10
+from ultralytics.models import YOLOv10
 import glob
 import os
 
 # 학습된 모델 로드
-model = YOLOv10("./best.pt")
+model = YOLOv10("weights/bd_origin.pt")
 
 def draw_bounding_boxes(image_path, results, output_image_path, output_coords_path, visualize_image_path, confidence_threshold=0.3):
     image = cv2.imread(image_path)
@@ -36,7 +36,7 @@ def draw_bounding_boxes(image_path, results, output_image_path, output_coords_pa
     cv2.imwrite(visualize_image_path, image)
 
 # roadview 폴더에서 이미지 파일 검색
-image_files = glob.glob('roadview/*.png')  # 폴더 내의 PNG 이미지 검색
+image_files = glob.glob('roadview/image/*.png')  # 폴더 내의 PNG 이미지 검색
 if not image_files:
     print("No image found in the roadview folder.")
     exit(1)
@@ -46,9 +46,9 @@ source_image_path = image_files[0]
 print(f"Using image: {source_image_path}")
 
 # 결과를 저장할 경로 설정
-output_image_path = 'upgrade_output/new_result.png'
-output_coords_path = 'upgradebb_output/new_result.txt'
-visualize_image_path = 'visualize/new_result_visualized.png'  # visualize 폴더에 저장될 이미지 경로
+output_image_path = 'bd_output/image/new_result.png'
+output_coords_path = 'bd_output/coordinate/new_result.txt'
+visualize_image_path = 'bd_output/visualize/new_result_visualized.png'  # visualize 폴더에 저장될 이미지 경로
 
 # 추론 수행
 results = model(source_image_path)
