@@ -1,0 +1,18 @@
+#/home/choemj/.config/yolov10/settings.yaml
+
+settings_version: 0.0.4
+datasets_dir: /mnt/hdd_4A/choemj/2025winterlab/train_bd
+weights_dir: /mnt/hdd_4A/choemj/2025winterlab/weights
+uuid: c93fcc74d7fa1a0c6de8c54293e39431c1eb99b9f36a4bdcbfdcfdd191e79cdc
+sync: true
+api_key: ''
+openai_api_key: ''
+clearml: true
+comet: true
+dvc: true
+hub: true
+mlflow: true
+neptune: true
+raytune: true
+tensorboard: true
+wandb: true
