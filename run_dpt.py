@@ -17,32 +17,26 @@ from dpt.transforms import Resize, NormalizeImage, PrepareForNet
 #from util.misc import visualize_attention
 
 
-def run(input_path, output_path, model_path, model_type="dpt_hybrid_monodepth", optimize=True, cuda_NUM=4):
+def run(input_path, output_path, model_path, model_type="dpt_monodepth", optimize=True, cuda_NUM=0):
     """Run MonoDepthNN to compute depth maps.
 
     Args:
         input_path (str): path to input folder
         output_path (str): path to output folder
         model_path (str): path to saved model
+        model_type (str): type of the model to use [dpt_monodepth|dpt_segmentation|dpt_kitti|dpt_nyu]
+        optimize (bool): whether to optimize model for inference
+        cuda_NUM (int): GPU device number
     """
     print("initialize")
 
     # select device (set to GPU cuda_NUM)
     device = torch.device(f"cuda:{cuda_NUM}" if torch.cuda.is_available() else "cpu")
-    print("device: %s" % device)
+    print(f"device: {device}")
 
     # load network
-    if model_type == "dpt_large":  # DPT-Large
-        net_w = net_h = 384
-        model = DPTDepthModel(
-            path=model_path,
-            backbone="vitl16_384",
-            non_negative=True,
-            enable_attention_hooks=False,
-        )
-        normalization = NormalizeImage(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-    elif model_type == "dpt_monodepth":  # DPT-Hybrid
-        net_w = net_h = 384
+    if model_type == "dpt_monodepth":
+        net_w, net_h = 384, 384
         model = DPTDepthModel(
             path=model_path,
             backbone="vitb_rn50_384",
@@ -50,10 +44,19 @@ def run(input_path, output_path, model_path, model_type="dpt_hybrid_monodepth", 
             enable_attention_hooks=False,
         )
         normalization = NormalizeImage(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-    elif model_type == "dpt_kitti":
-        net_w = 1216
-        net_h = 352
 
+    elif model_type == "dpt_segmentation":
+        net_w, net_h = 384, 384
+        model = DPTDepthModel(
+            path=model_path,
+            backbone="vitb_rn50_384",
+            non_negative=True,
+            enable_attention_hooks=False,
+        )
+        normalization = NormalizeImage(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+
+    elif model_type == "dpt_kitti":
+        net_w, net_h = 1216, 352
         model = DPTDepthModel(
             path=model_path,
             scale=0.00006016,
@@ -63,12 +66,10 @@ def run(input_path, output_path, model_path, model_type="dpt_hybrid_monodepth", 
             non_negative=True,
             enable_attention_hooks=False,
         )
-
         normalization = NormalizeImage(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-    elif model_type == "dpt_nyu":
-        net_w = 640
-        net_h = 480
 
+    elif model_type == "dpt_nyu":
+        net_w, net_h = 640, 480
         model = DPTDepthModel(
             path=model_path,
             scale=0.000305,
@@ -78,19 +79,12 @@ def run(input_path, output_path, model_path, model_type="dpt_hybrid_monodepth", 
             non_negative=True,
             enable_attention_hooks=False,
         )
-
         normalization = NormalizeImage(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-    elif model_type == "midas_v21":  # Convolutional model
-        net_w = net_h = 384
 
-        model = MidasNet_large(model_path, non_negative=True)
-        normalization = NormalizeImage(
-            mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-        )
     else:
-        assert (
-            False
-        ), f"model_type '{model_type}' not implemented, use: --model_type [dpt_large|dpt_hybrid|dpt_hybrid_kitti|dpt_hybrid_nyu|midas_v21]"
+        raise ValueError(
+            f"model_type '{model_type}' not implemented. Use one of: [dpt_monodepth|dpt_segmentation|dpt_kitti|dpt_nyu]"
+        )
 
     transform = Compose(
         [
@@ -110,7 +104,7 @@ def run(input_path, output_path, model_path, model_type="dpt_hybrid_monodepth", 
 
     model.eval()
 
-    if optimize == True and device.type == 'cuda':
+    if optimize and device.type == 'cuda':
         model = model.to(memory_format=torch.channels_last)
         model = model.half()
 
@@ -128,18 +122,24 @@ def run(input_path, output_path, model_path, model_type="dpt_hybrid_monodepth", 
         if os.path.isdir(img_name):
             continue
 
-        print("  processing {} ({}/{})".format(img_name, ind + 1, num_images))
-        # input
-
+        print(f"  processing {img_name} ({ind + 1}/{num_images})")
         img = util.io.read_image(img_name)
 
-        if args.kitti_crop is True:
+        # 디버깅 코드 추가: 입력 이미지 확인
+        if img is None:
+            raise ValueError(f"Input image at {img_name} could not be loaded!")
+        print(f"Input image shape: {img.shape}, range: [{img.min()}, {img.max()}]")
+
+        if model_type == "dpt_kitti" and args.kitti_crop:
             height, width, _ = img.shape
             top = height - 352
             left = (width - 1216) // 2
             img = img[top : top + 352, left : left + 1216, :]
 
         img_input = transform({"image": img})["image"]
+        # 디버깅 코드 추가: 전처리된 입력 데이터 확인
+        print(f"Preprocessed input tensor shape: {img_input.shape}, "
+            f"range: [{img_input.min()}, {img_input.max()}]")
 
         # compute
         with torch.no_grad():
@@ -150,6 +150,9 @@ def run(input_path, output_path, model_path, model_type="dpt_hybrid_monodepth", 
                 sample = sample.half()
 
             prediction = model.forward(sample)
+            # 디버깅 코드 추가: 모델 출력 확인
+            print(f"Model output shape: {prediction.shape}, "
+                f"range: [{prediction.min()}, {prediction.max()}]")
             prediction = (
                 torch.nn.functional.interpolate(
                     prediction.unsqueeze(1),
@@ -162,10 +165,10 @@ def run(input_path, output_path, model_path, model_type="dpt_hybrid_monodepth", 
                 .numpy()
             )
 
-            if model_type == "dpt_hybrid_kitti":
+            if model_type == "dpt_kitti":
                 prediction *= 256
 
-            if model_type == "dpt_hybrid_nyu":
+            if model_type == "dpt_nyu":
                 prediction *= 1000.0
 
         filename = os.path.join(
@@ -174,6 +177,10 @@ def run(input_path, output_path, model_path, model_type="dpt_hybrid_monodepth", 
         util.io.write_depth(filename, prediction, bits=2, absolute_depth=args.absolute_depth)
 
     print("finished")
+    # 최종 결과 확인
+    prediction = prediction.squeeze().cpu().numpy()
+    print(f"Final depth map shape: {prediction.shape}, "
+        f"range: [{prediction.min()}, {prediction.max()}]")
 
 
 if __name__ == "__main__":
