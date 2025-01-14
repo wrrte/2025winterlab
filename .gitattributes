@@ -1,3 +1,4 @@
-weights/dpt_hybrid-midas-501f0c75.pt filter=lfs diff=lfs merge=lfs -text
-weights/dpt_hybrid_origin.pt filter=lfs diff=lfs merge=lfs -text
-weights/dpt/dpt_hybrid_origin.pt filter=lfs diff=lfs merge=lfs -text
+weights/dpt_hybrid/dpt_monodepth.pt filter=lfs diff=lfs merge=lfs -text
+weights/dpt_hybrid/dpt_segmentation.pt filter=lfs diff=lfs merge=lfs -text
+weights/dpt_hybrid/dpt_kitti.pt filter=lfs diff=lfs merge=lfs -text
+weights/dpt_hybrid/dpt_nyu.pt filter=lfs diff=lfs merge=lfs -text

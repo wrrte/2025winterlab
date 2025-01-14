@@ -16,3 +16,7 @@ neptune: true
 raytune: true
 tensorboard: true
 wandb: true
+
+#pip install ultralytics인 경우
+#yolov10.yaml 파일을 pip show ultralytics 위치에 옮기기.
+#setting.yaml 파일의 경로 수정
