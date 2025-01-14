@@ -1,5 +1,5 @@
 import cv2
-from ultralytics.models import YOLOv10
+from ultralytics import YOLOv10
 import glob
 import os
 

@@ -1,6 +1,6 @@
 # yolov10.yaml
-train: ./train  # train 폴더 경로
-val: ./val  # val 폴더 경로
+train: /train  # train 폴더 경로
+val: /val  # val 폴더 경로
 
 # 클래스 수
 nc: 1
