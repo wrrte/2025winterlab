@@ -17,7 +17,7 @@ from dpt.transforms import Resize, NormalizeImage, PrepareForNet
 #from util.misc import visualize_attention
 
 
-def run(input_path, output_path, model_path, model_type="dpt_hybrid", optimize=True, cuda_NUM=4):
+def run(input_path, output_path, model_path, model_type="dpt_hybrid_monodepth", optimize=True, cuda_NUM=4):
     """Run MonoDepthNN to compute depth maps.
 
     Args:
@@ -41,7 +41,7 @@ def run(input_path, output_path, model_path, model_type="dpt_hybrid", optimize=T
             enable_attention_hooks=False,
         )
         normalization = NormalizeImage(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-    elif model_type == "dpt_hybrid":  # DPT-Hybrid
+    elif model_type == "dpt_monodepth":  # DPT-Hybrid
         net_w = net_h = 384
         model = DPTDepthModel(
             path=model_path,
@@ -50,7 +50,7 @@ def run(input_path, output_path, model_path, model_type="dpt_hybrid", optimize=T
             enable_attention_hooks=False,
         )
         normalization = NormalizeImage(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-    elif model_type == "dpt_hybrid_kitti":
+    elif model_type == "dpt_kitti":
         net_w = 1216
         net_h = 352
 
@@ -65,7 +65,7 @@ def run(input_path, output_path, model_path, model_type="dpt_hybrid", optimize=T
         )
 
         normalization = NormalizeImage(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-    elif model_type == "dpt_hybrid_nyu":
+    elif model_type == "dpt_nyu":
         net_w = 640
         net_h = 480
 
@@ -197,8 +197,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "-t",
         "--model_type",
-        default="dpt_hybrid",
-        help="model type [dpt_large|dpt_hybrid|midas_v21]",
+        default="dpt_monodepth",
+        help="model type [dpt_monodepth|dpt_segmentation|dpt_kitti|dpt_nyu]",
     )
 
     parser.add_argument("--kitti_crop", dest="kitti_crop", action="store_true")
@@ -214,11 +214,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     default_models = {
-        "midas_v21": "weights/midas_v21-f6b98070.pt",
-        "dpt_large": "weights/dpt_large-midas-2f21e586.pt",
-        "dpt_hybrid": "weights/dpt_hybrid_origin.pt",
-        "dpt_hybrid_kitti": "weights/dpt_hybrid_kitti-cb926ef4.pt",
-        "dpt_hybrid_nyu": "weights/dpt_hybrid_nyu-2ce69ec7.pt",
+        "dpt_monodepth": "weights/dpt_hybrid/dpt_monodepth.pt",
+        "dpt_segmentation": "weights/dpt_hybrid/dpt_segmentation.pt",
+        "dpt_kitti": "weights/dpt_hybrid/dpt_kitti.pt",
+        "dpt_nyu": "weights/dpt_hybrid/dpt_nyu.pt",
     }
 
     if args.model_weights is None:
