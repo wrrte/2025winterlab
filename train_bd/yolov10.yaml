@@ -1,5 +1,4 @@
 # yolov10.yaml
-datasets_dir: /mnt/hdd_4A/choemj/2025winterlab/train_bd
 train: ./train  # train 폴더 경로
 val: ./val  # val 폴더 경로
 
