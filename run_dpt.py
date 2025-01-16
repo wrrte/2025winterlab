@@ -141,7 +141,7 @@ def run(input_path, output_path, model_path, model_type="dpt_monodepth", optimiz
         img_input = transform({"image": img})["image"]
         # 디버깅 코드 추가: 전처리된 입력 데이터 확인
         print(f"Preprocessed input tensor shape: {img_input.shape}, "
-            f"range: [{img_input.min()}, {img_input.max()}]")
+            f"Raw range: [{img_input.min()}, {img_input.max()}]")
 
         # compute
         with torch.no_grad():
@@ -176,7 +176,7 @@ def run(input_path, output_path, model_path, model_type="dpt_monodepth", optimiz
         filename = os.path.join(
             output_path, os.path.splitext(os.path.basename(img_name))[0]
         )
-        util.io.write_depth(filename, prediction, bits=2, absolute_depth=args.absolute_depth)
+        util.io.write_depth(filename, prediction, bits=1, absolute_depth=args.absolute_depth)
 
     print("finished")
 
