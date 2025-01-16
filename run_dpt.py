@@ -14,6 +14,8 @@ from dpt.models import DPTDepthModel
 from dpt.midas_net import MidasNet_large
 from dpt.transforms import Resize, NormalizeImage, PrepareForNet
 
+import numpy as np
+
 #from util.misc import visualize_attention
 
 
@@ -177,10 +179,7 @@ def run(input_path, output_path, model_path, model_type="dpt_monodepth", optimiz
         util.io.write_depth(filename, prediction, bits=2, absolute_depth=args.absolute_depth)
 
     print("finished")
-    # 최종 결과 확인
-    prediction = prediction.squeeze().cpu().numpy()
-    print(f"Final depth map shape: {prediction.shape}, "
-        f"range: [{prediction.min()}, {prediction.max()}]")
+
 
 
 if __name__ == "__main__":

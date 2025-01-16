@@ -190,10 +190,21 @@ def write_depth(path, depth, bits=1, absolute_depth=False):
         else:
             out = np.zeros(depth.shape, dtype=depth.dtype)
 
+    print(f"Raw depth map range: [{out.min()}, {out.max()}]")
+
+    # 출력 정규화
+    out_min, out_max = out.min(), out.max()
+    if out_max - out_min > 0:  # NaN 방지
+        out_normalized = (out - out_min) / (out_max - out_min)
+    else:
+        out_normalized = out  # 정규화 불필요
+
+    print(f"Normalized depth map range: [{out_normalized.min()}, {out_normalized.max()}]")
+
     if bits == 1:
-        cv2.imwrite(path + ".png", out.astype("uint8"), [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        cv2.imwrite(path + ".png", (out_normalized * 1).astype("uint8"), [cv2.IMWRITE_PNG_COMPRESSION, 0])
     elif bits == 2:
-        cv2.imwrite(path + ".png", out.astype("uint16"), [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        cv2.imwrite(path + ".png", (out_normalized * 1).astype("uint16"), [cv2.IMWRITE_PNG_COMPRESSION, 0])
 
     return
 
