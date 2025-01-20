@@ -1,0 +1,6 @@
+.vscode/
+weights/dpt_hybrid/
+GS1GEO/south-korea-latest.osm.pbf
+train_bd/test/
+train_bd/train/
+train_bd/val/

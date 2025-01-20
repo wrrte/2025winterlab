@@ -1,0 +1,3 @@
+https://download.geofabrik.de
+
+https://github.com/openstreetmap/osmosis
