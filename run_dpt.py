@@ -26,7 +26,7 @@ def run(input_path, output_path, model_path, model_type="dpt_monodepth", optimiz
         input_path (str): path to input folder
         output_path (str): path to output folder
         model_path (str): path to saved model
-        model_type (str): type of the model to use [dpt_monodepth|dpt_segmentation|dpt_kitti|dpt_nyu]
+        model_type (str): type of the model to use [dpt_monodepth|dpt_kitti|dpt_nyu]
         optimize (bool): whether to optimize model for inference
         cuda_NUM (int): GPU device number
     """
@@ -38,16 +38,6 @@ def run(input_path, output_path, model_path, model_type="dpt_monodepth", optimiz
 
     # load network
     if model_type == "dpt_monodepth":
-        net_w, net_h = 384, 384
-        model = DPTDepthModel(
-            path=model_path,
-            backbone="vitb_rn50_384",
-            non_negative=True,
-            enable_attention_hooks=False,
-        )
-        normalization = NormalizeImage(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-
-    elif model_type == "dpt_segmentation":
         net_w, net_h = 384, 384
         model = DPTDepthModel(
             path=model_path,
@@ -85,7 +75,7 @@ def run(input_path, output_path, model_path, model_type="dpt_monodepth", optimiz
 
     else:
         raise ValueError(
-            f"model_type '{model_type}' not implemented. Use one of: [dpt_monodepth|dpt_segmentation|dpt_kitti|dpt_nyu]"
+            f"model_type '{model_type}' not implemented. Use one of: [dpt_monodepth|dpt_kitti|dpt_nyu]"
         )
 
     transform = Compose(
@@ -176,7 +166,7 @@ def run(input_path, output_path, model_path, model_type="dpt_monodepth", optimiz
         filename = os.path.join(
             output_path, os.path.splitext(os.path.basename(img_name))[0]
         )
-        util.io.write_depth(filename, prediction, bits=1, absolute_depth=args.absolute_depth)
+        util.io.write_depth(f"{filename}_{model_type}", prediction, bits=1, absolute_depth=args.absolute_depth)
 
     print("finished")
 
@@ -204,7 +194,7 @@ if __name__ == "__main__":
         "-t",
         "--model_type",
         default="dpt_monodepth",
-        help="model type [dpt_monodepth|dpt_segmentation|dpt_kitti|dpt_nyu]",
+        help="model type [dpt_monodepth|dpt_kitti|dpt_nyu]",
     )
 
     parser.add_argument("--kitti_crop", dest="kitti_crop", action="store_true")
@@ -221,7 +211,6 @@ if __name__ == "__main__":
 
     default_models = {
         "dpt_monodepth": "weights/dpt_hybrid/dpt_monodepth.pt",
-        "dpt_segmentation": "weights/dpt_hybrid/dpt_segmentation.pt",
         "dpt_kitti": "weights/dpt_hybrid/dpt_kitti.pt",
         "dpt_nyu": "weights/dpt_hybrid/dpt_nyu.pt",
     }
