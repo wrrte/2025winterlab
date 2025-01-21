@@ -1,11 +1,11 @@
 import cv2
-from ultralytics.models import YOLOv10
+from ultralytics.models import YOLO
 import glob
 import os
 
 # 학습된 모델 로드
 model_name = "bd_origin_1"
-model = YOLOv10(f"weights/{model_name}.pt")
+model = YOLO(f"weights/{model_name}.pt")
 
 def draw_bounding_boxes(image_path, results, output_image_path, output_coords_path, visualize_image_path, confidence_threshold=0.3):
     image = cv2.imread(image_path)
