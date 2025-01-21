@@ -6,3 +6,5 @@ train_bd/train/
 train_bd/val/
 runs/detect/YOLOv10_trained.tar.gz
 weights/bd/yolo11x.pt
+test_dpt/dataset/
+test_dpt/weights/
