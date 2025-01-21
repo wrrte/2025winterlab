@@ -1,4 +1,4 @@
-from ultralytics import YOLOv10
+from ultralytics import YOLO
 
 import os
 os.environ["CUDA_VISIBLE_DEVICES"]="1" # 0, 1
@@ -14,7 +14,7 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
 
-model = YOLOv10('/home/seyeon/2025winterlab/runs/detect/train_m/weights/best.pt')
+model = YOLO('/home/seyeon/2025winterlab/runs/detect/train_m/weights/best.pt')
 #model.train(data='yolov10.yaml', epochs=500, batch=16, imgsz=640)
 test_images_dir = '/home/seyeon/2025winterlab/train_bd/train/images/'
 

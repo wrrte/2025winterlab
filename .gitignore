@@ -4,3 +4,5 @@ GS1GEO/south-korea-latest.osm.pbf
 train_bd/test/
 train_bd/train/
 train_bd/val/
+runs/detect/YOLOv10_trained.tar.gz
+weights/bd/yolo11x.pt
