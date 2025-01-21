@@ -142,8 +142,8 @@ current_gps = (36.370077, 127.379437)  # 현재 GPS 위치 (위도, 경도)
 heading = 180  # 카메라의 현재 바라보는 방향 (서쪽 85도)
 reference_distance = 2.5  # 참조 지점의 실제 거리 (미터)
 FOV = 72  # 화각 72도
-pfm_folder_path = './dpt_output/'  # PFM 파일이 저장된 폴더 경로
-detection_script_path = './run_bd.py'  # building detection 파일 경로
+pfm_folder_path = 'dpt_output/'  # PFM 파일이 저장된 폴더 경로
+detection_script_path = 'run_bd.py'  # building detection 파일 경로
 record_dir = 'roadview/reference_point'  # 텍스트 파일이 저장된 폴더 경로
 
 predicted_gps_points = predict_detection_points_gps(detection_script_path, pfm_folder_path, record_dir, current_gps, heading, reference_distance, FOV)

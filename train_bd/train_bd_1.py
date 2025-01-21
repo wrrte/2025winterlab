@@ -8,4 +8,4 @@ os.environ["CUDA_VISIBLE_DEVICES"]="1" # 0, 1
 
 model = YOLOv10('../weights/bd/bd_yolov10x.pt')
 
-model.train(data='yolov10.yaml', epochs=500, batch=16, imgsz=640)
+model.train(data='yolov10.yaml', epochs=1000, batch=16, imgsz=640)
