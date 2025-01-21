@@ -1,1 +1,1 @@
-https://docs.ultralytics.com/ko/models/yolov10/#key-features
+https://docs.ultralytics.com/ko/models/yolo11/#performance-metrics
