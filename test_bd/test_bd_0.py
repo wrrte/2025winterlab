@@ -5,12 +5,6 @@ os.environ["CUDA_VISIBLE_DEVICES"]="1" # 0, 1
 
 import time
 import torch
-import sys
-import logging
-
-original_stdout = sys.stdout
-sys.stdout = open('/dev/null', 'w')
-logging.getLogger().setLevel(logging.WARNING)  # WARNING 수준 이상만 출력
 
 # Set the random seed for reproducibility
 SEED = 42
@@ -19,14 +13,14 @@ torch.cuda.manual_seed_all(SEED)  # For CUDA operations
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-mts = ["l", "m", "s", "x"]
+mts = ["n", "s", "m", "l", "x"]
 message = []
 
 for model_type in mts:
 
     model = YOLO(model=f"runs/detect/train_{model_type}/weights/best.pt", verbose=False)
     #model.train(data='yolov10.yaml', epochs=500, batch=16, imgsz=640)
-    test_images_dir = '/home/choemj/2025winterlab/train_bd/test/images/'
+    test_images_dir = '/mnt/hdd_4A/choemj/2025winterlab/train_bd/val/images/lindau/'
 
     inference_time = []
     fps = []
@@ -50,9 +44,7 @@ for model_type in mts:
     trimmed_fps = sorted_fps[1:-1]
     avg_fps = sum(sorted_fps) / len(sorted_fps)
 
-    sys.stdout = original_stdout
     message.append(f"type {model_type} Average FPS : {avg_fps:.4f}")
-    sys.stdout = open('/dev/null', 'w')
 
 for m in message:
     print(m)
