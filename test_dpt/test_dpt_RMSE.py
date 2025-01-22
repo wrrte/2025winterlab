@@ -118,8 +118,10 @@ if __name__ == "__main__":
         "dpt_nyu": "/home/seyeon/2025winterlab/test_dpt/weights/dpt_nyu2.pt"
     }
 
-    selected_model_type = "dpt_kitti"  #Select model to evaluate
+    #######################SELECT MODEL############################
+    selected_model_type = "dpt_nyu"
     model_path = model_paths[selected_model_type]
+    ###############################################################
 
     input_folder = "/home/seyeon/2025winterlab/test_dpt/dataset/image"  # Path to input images
     ground_truth_folder = "/home/seyeon/2025winterlab/test_dpt/dataset/groundtruth_depth"  # Path to ground truth images
