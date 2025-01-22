@@ -9,3 +9,4 @@ weights/bd/yolo11x.pt
 test_dpt/dataset/
 test_dpt/weights/
 runs/detect/train_x
+bd_output

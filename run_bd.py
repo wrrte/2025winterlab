@@ -2,10 +2,12 @@ import cv2
 from ultralytics.models import YOLO
 import glob
 import os
+import argparse
 
-# 학습된 모델 로드
-model_name = "bd_origin_1"
-model = YOLO(f"weights/{model_name}.pt")
+parser = argparse.ArgumentParser()
+parser.add_argument("-t", "--model_type", default="m", help="yolo model type you want to run")
+args = parser.parse_args()
+model = YOLO(f"runs/detect/train_{args.model_type}/weights/best.pt")
 
 def draw_bounding_boxes(image_path, results, output_image_path, output_coords_path, visualize_image_path, confidence_threshold=0.3):
     image = cv2.imread(image_path)
@@ -52,9 +54,9 @@ for source_image_path in image_files:
     print(f"Processing image: {source_image_path}")
     
     # 결과를 저장할 경로 설정
-    output_image_path = f'bd_output/image/{file_name_without_ext}-{model_name}.png'
-    output_coords_path = f'bd_output/coordinate/{file_name_without_ext}-{model_name}.txt'
-    visualize_image_path = f'bd_output/visualize/{file_name_without_ext}-{model_name}-visualized.png'
+    output_image_path = f'bd_output/image/{file_name_without_ext}-{args.model_type}.png'
+    output_coords_path = f'bd_output/coordinate/{file_name_without_ext}-{args.model_type}.txt'
+    visualize_image_path = f'bd_output/visualize/{file_name_without_ext}-{args.model_type}-visualized.png'
     
     # 추론 수행
     results = model(source_image_path)
