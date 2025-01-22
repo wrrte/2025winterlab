@@ -5,13 +5,8 @@ import os
 import argparse
 
 parser = argparse.ArgumentParser()
-
-parser.add_argument(
-    "-t", "--model_type", default="m", help="yolo model type you want to run"
-)
-
+parser.add_argument("-t", "--model_type", default="m", help="yolo model type you want to run")
 args = parser.parse_args()
-
 model = YOLO(f"runs/detect/train_{args.model_type}/weights/best.pt")
 
 def draw_bounding_boxes(image_path, results, output_image_path, output_coords_path, visualize_image_path, confidence_threshold=0.3):
