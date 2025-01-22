@@ -13,8 +13,8 @@ torch.cuda.manual_seed_all(SEED)  # For CUDA operations
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-
-model = YOLO('/mnt/hdd_4A/choemj/2025winterlab/runs/detect/train2/weights/best.pt')
+model_type = "l"
+model = YOLO(f"runs/detect/train_{model_type}/weights/best.pt")
 #model.train(data='yolov10.yaml', epochs=500, batch=16, imgsz=640)
 test_images_dir = '/home/choemj/2025winterlab/train_bd/train/images/'
 
