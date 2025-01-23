@@ -10,3 +10,6 @@ test_dpt/dataset/
 test_dpt/weights/
 weights/bd_trained/train_x
 bd_output
+requirements/requirements3/settings.json
+requirements/requirements3/yolov11.yaml
+
