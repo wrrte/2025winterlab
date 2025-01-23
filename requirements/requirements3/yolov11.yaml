@@ -1,8 +1,8 @@
 # yolov11.yaml
 # pip show ultralytics로 나오는 경로 내의 ultralytics 폴더에 이 파일을 추가
 
-train: /mnt/hdd_4A//choemj/2025winterlab/train_bd/train  # train 폴더 경로
-val: /mnt/hdd_4A//choemj/2025winterlab/train_bd/val  # val 폴더 경로
+train: /mnt/hdd_4A//seyeon/2025winterlab/train_bd/train  # train 폴더 경로
+val: /mnt/hdd_4A//seyeon/2025winterlab/train_bd/val  # val 폴더 경로
 
 # 클래스 수
 nc: 1
