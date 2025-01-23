@@ -96,6 +96,7 @@ class BboxLoss(nn.Module):
         super().__init__()
         self.dfl_loss = DFLoss(reg_max) if reg_max > 1 else None
 
+    # choemj
     def forward(self, pred_dist, pred_bboxes, anchor_points, target_bboxes, target_scores, target_scores_sum, fg_mask, pred_depth=None, target_depth=None):
         """IoU loss."""
         weight = target_scores.sum(-1)[fg_mask].unsqueeze(-1)
@@ -110,7 +111,7 @@ class BboxLoss(nn.Module):
         else:
             loss_dfl = torch.tensor(0.0).to(pred_dist.device)
 
-        # Depth 손실 계산 (추가된 부분)
+        # choemj : Depth 손실 계산 (추가된 부분)
         if pred_depth and target_depth:
             loss_depth = F.mse_loss(pred_depth[fg_mask], target_depth[fg_mask])  # MSE로 depth 손실 계산
         else:
@@ -211,7 +212,7 @@ class v8DetectionLoss:
 
     def __call__(self, preds, batch):
         """Calculate the sum of the loss for box, cls and dfl multiplied by batch size."""
-        loss = torch.zeros(3, device=self.device)  # box, cls, dfl
+        loss = torch.zeros(4, device=self.device)  # box, cls, dfl, choemj : depth
         feats = preds[1] if isinstance(preds, tuple) else preds
         pred_distri, pred_scores = torch.cat([xi.view(feats[0].shape[0], self.no, -1) for xi in feats], 2).split(
             (self.reg_max * 4, self.nc), 1
@@ -262,7 +263,7 @@ class v8DetectionLoss:
         loss[0] *= self.hyp.box  # box gain
         loss[1] *= self.hyp.cls  # cls gain
         loss[2] *= self.hyp.dfl  # dfl gain
-        loss[3] *= self.hyp.dpt  # depth gain
+        loss[3] *= self.hyp.dpt  # choemj : depth gain
 
         return loss.sum() * batch_size, loss.detach()  # loss(box, cls, dfl)
 
