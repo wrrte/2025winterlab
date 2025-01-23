@@ -8,4 +8,4 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0" # 0, 1
 
 model = YOLO(model='/mnt/hdd_4A/choemj/2025winterlab/weights/bd/yolo11n.pt')
 
-model.train(data='yolov11.yaml', epochs=1000, batch=128, imgsz=640)
+model.train(data='yolov11.yaml', epochs=1000, batch=128, imgsz=640, project="weights/trained/")

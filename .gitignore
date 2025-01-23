@@ -4,9 +4,9 @@ GS1GEO/south-korea-latest.osm.pbf
 train_bd/test/
 train_bd/train/
 train_bd/val/
-runs/detect/YOLOv10_trained.tar.gz
-weights/bd/yolo11x.pt
+weights/bd_trained/YOLOv10_trained.tar.gz
+weights/bd_pretrained/yolo11x.pt
 test_dpt/dataset/
 test_dpt/weights/
-runs/detect/train_x
+weights/bd_trained/train_x
 bd_output
