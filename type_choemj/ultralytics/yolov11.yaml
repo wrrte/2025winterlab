@@ -5,7 +5,7 @@ val: /mnt/hdd_4A/choemj/2025winterlab/type_choemj/datasets/val  # val 폴더 경
 
 # 클래스 수
 nc: 1
-depth: 1
+#depth: 1
 
 # 클래스 이름
 names: ['building']
