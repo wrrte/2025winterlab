@@ -1,11 +1,22 @@
 from ultralytics.models import YOLO
-
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]="0" # 0, 1
 
-#nvitop -m compact --only-compute
-#duf --style ascii
+# Set GPU number
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-model = YOLO(model='/mnt/hdd_4A/choemj/2025winterlab/weights/bd/yolo11n.pt')
+# Paths
+weights_path = "weights/bd_pretrained/yolom11.pt"
+save_dir = "weights/bd_trained"
+dataset_yaml = "ultralytics/yolov11.yaml"
 
-model.train(data='yolov11.yaml', epochs=1000, batch=128, imgsz=640, project="weights/trained/")
+# Initialize with pretrained weights
+model = YOLO(model=weights_path)
+
+#Train YOLO model
+model.train(
+    data=dataset_yaml,
+    epochs=1000,
+    batch=128,
+    imgsz=640,
+    project=save_dir  # Save trained model in bd_trained folder
+)
