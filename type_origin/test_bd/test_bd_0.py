@@ -18,9 +18,9 @@ message = []
 
 for model_type in mts:
 
-    model = YOLO(model=f"runs/detect/train_{model_type}/weights/best.pt", verbose=False)
+    model = YOLO(model=f"weights/bd_trained/train_m/weights/best.pt", verbose=False)
     #model.train(data='yolov10.yaml', epochs=500, batch=16, imgsz=640)
-    test_images_dir = '/mnt/hdd_4A/choemj/2025winterlab/train_bd/val/images/lindau/'
+    test_images_dir = '/home/seyeon/2025winterlab/roadview/image'
 
     inference_time = []
     fps = []
