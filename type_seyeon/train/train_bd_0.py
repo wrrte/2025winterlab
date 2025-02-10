@@ -5,9 +5,9 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # Paths
-weights_path = "weights/bd_pretrained/yolom11.pt"
-save_dir = "weights/bd_trained"
-dataset_yaml = "ultralytics/yolov11.yaml"
+weights_path = "../weights/bd_pretrained/yolo11n.pt"
+save_dir = "../weights/bd_trained"
+dataset_yaml = "../ultralytics/yolov11.yaml"
 
 # Initialize with pretrained weights
 model = YOLO(model=weights_path)
