@@ -96,11 +96,17 @@ class BboxLoss(nn.Module):
         super().__init__()
         self.dfl_loss = DFLoss(reg_max) if reg_max > 1 else None
 
-    def forward(self, pred_dist, pred_bboxes, anchor_points, target_bboxes, target_scores, target_scores_sum, fg_mask):
+    def forward(self, pred_dist, pred_bboxes, anchor_points, target_bboxes, target_scores, target_scores_sum, fg_mask, image_width = 640):
         """IoU loss."""
         weight = target_scores.sum(-1)[fg_mask].unsqueeze(-1)
         iou = bbox_iou(pred_bboxes[fg_mask], target_bboxes[fg_mask], xywh=False, CIoU=True)
-        loss_iou = ((1.0 - iou) * weight).sum() / target_scores_sum
+        
+        # Compute x-based weighting
+        x_coords = target_bboxes[fg_mask][:, 0] + target_bboxes[fg_mask][:, 2] / 2  # (M,)
+        w_scale = 1 + torch.abs((x_coords - image_width / 2) / (image_width / 2))  # Scale factor
+        
+        # Apply x-based weight scaling
+        loss_iou = (((1.0 - iou) * weight * w_scale.unsqueeze(-1)).sum()) / target_scores_sum
 
         # DFL loss
         if self.dfl_loss:
