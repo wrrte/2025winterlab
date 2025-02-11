@@ -1,6 +1,6 @@
 task: detect
 mode: train
-model: ../weights/bd_pretrained/yolo11m.pt
+model: ../weights/bd_pretrained/yolo11n.pt
 data: ../ultralytics/yolov11.yaml
 epochs: 1000
 time: null
@@ -10,7 +10,7 @@ imgsz: 640
 save: true
 save_period: -1
 cache: false
-device: null
+device: cuda:0
 workers: 8
 project: ../weights/bd_trained
 name: train
