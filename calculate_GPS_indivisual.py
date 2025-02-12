@@ -121,8 +121,6 @@ def predict_detection_points_gps(detection_script_path, pfm_folder_path, record_
 
     pfm_file_path = run_dpt_and_get_latest_pfm(pfm_folder_path)
 
-    start_time = time.time()
-
     depth_map, scale = load_pfm(pfm_file_path)
     height, width = depth_map.shape[:2]
     
@@ -139,10 +137,6 @@ def predict_detection_points_gps(detection_script_path, pfm_folder_path, record_
 
         predicted_gps = calculate_gps_coordinates(current_gps, heading, angle, distance)
         predicted_gps_points.append((predicted_gps, angle, distance))
-
-    end_time = time.time()
-    tot_time = end_time - start_time
-    inference_time.append(tot_time)
 
     return predicted_gps_points
 
