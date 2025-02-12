@@ -1,27 +1,23 @@
 import cv2
 import numpy as np
-import argparse
 from ultralytics.models import YOLO
 import glob
 import os
+from sklearn.metrics import mean_squared_error
 
 # Depth calculation constants
 F = 100 # focal length
 B = 100 # baseline
 
-# Argument parser
-parser = argparse.ArgumentParser()
-parser.add_argument("-t", "--model_type", default = "m", help = "YOLO model type to test")
-args = parser.parse_args()
-
-# Load model
-model = YOLO(f"../weights/bd_trained/train5/weights/best.pt") #모델 경로 수정
+# Select model
+MODEL_PATH = "/home/seyeon/2025winterlab/type_seyeon/weights/bd_trained/train10/weights/best.pt"
+model = YOLO(MODEL_PATH)
 
 #Load test dataset
-left_images = sorted(glob.glob("test/test_left/*.png")) #left 이미지 경로
-right_images = sorted(glob.glob("test/test_right/*.png")) #right 이미지 경로
-depth_gt_images = sorted(glob.glob("test/test_depth/*.png")) #depth 이미지 경로
-disparity_gt_images = sorted(glob.glob("test/test_disparity/*.png")) #disparity 이미지 경로
+left_images = sorted(glob.glob("test/test_left/*.png"))
+right_images = sorted(glob.glob("test/test_right/*.png"))
+depth_gt_images = sorted(glob.glob("test/test_depth/*.png"))
+disparity_gt_images = sorted(glob.glob("test/test_disparity/*.png"))
 
 # Set output directory
 output_dir = "test_output"
@@ -41,19 +37,17 @@ def draw_bounding_boxes(image, results, confidence_threshold = 0.3):
         if conf >= confidence_threshold:
             valid_boxes.append((cls_id, conf, bbox))
             x_min, y_min, x_max, y_max = bbox
-            cv2.rectangle(image, (int(x_min)), (int(y_min)), (int(x_max)), (int(y_max)), (255, 0, 0), 2)
+            cv2.rectangle(image, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (255, 0, 0), 2)
     return image, valid_boxes
 
-#Calculate RMSE
-rmse_disparity = []
-rmse_depth = []
 
 # Image pair process
 for i, (left_img_path, right_img_path) in enumerate(zip(left_images, right_images)):
     left_image = cv2.imread(left_img_path)
     right_image = cv2.imread(right_img_path)
-    depth_gt = np.load(depth_gt_images[i])
-    disparity_gt = np.load(disparity_gt_images[i])
+    depth_gt = cv2.imread(depth_gt_images[i], cv2.IMREAD_GRAYSCALE)
+    disparity_gt = cv2.imread(disparity_gt_images[i], cv2.IMREAD_GRAYSCALE)
+
 
     left_results = model(left_img_path)
     right_results = model(right_img_path)
@@ -65,7 +59,48 @@ for i, (left_img_path, right_img_path) in enumerate(zip(left_images, right_image
     cv2.imwrite(f"{output_dir}/images/{os.path.basename(left_img_path)}", left_image)
     cv2.imwrite(f"{output_dir}/images/{os.path.basename(right_img_path)}", right_image)
 
-    disparity = []
-    depth = []
+    disparity_list = []
+    depth_list = []
 
+    for(cls_l, conf_l, bbox_l) in left_boxes:
+        for(cls_r, conf_r, bbox_r) in right_boxes:
+            if cls_l == cls_r:
+                x_min_l, _, x_max_l, _ = bbox_l
+                x_min_r, _, x_max_r, _ = bbox_r
+
+                x_center_l = (x_min_l + x_max_l) / 2
+                x_center_r = (x_min_r + x_max_r) / 2
+                disparity = abs(x_center_l - x_center_r)
+                depth = (F * B) / disparity if disparity != 0 else 0
+
+                disparity_list.append(disparity)
+                depth_list.append(depth)
     
+    # Save as txt
+    base_filename = os.path.splitext(os.path.basename(left_img_path))[0]
+    with open(f"{output_dir}/disparity/{base_filename}.txt", "w") as disp_file:
+        disp_file.write("\n".join(map(str, disparity_list)))
+
+    with open(f"{output_dir}/depth/{base_filename}.txt", "w") as depth_file:
+        depth_file.write("\n".join(map(str, depth_list)))
+
+    # Compute RMSE
+    rmse_disparity_list = []
+    rmse_depth_list = []
+
+    if len(disparity_list) > 0:
+        disparity_pred = np.array(disparity_list)
+        depth_pred = np.array(depth_list)
+
+        disparity_gt_resized = disparity_gt[:len(disparity_pred)]
+        depth_gt_resized = depth_gt[:len(depth_pred)]
+
+        rmse_disparity = np.sqrt(mean_squared_error(disparity_gt_resized, disparity_pred))
+        rmse_depth = np.sqrt(mean_squared_error(depth_gt_resized, depth_pred))
+
+        rmse_disparity_list.append(rmse_disparity)
+        rmse_depth_list.append(rmse_depth)
+    
+    # Print RMSE results
+    print(f"Average RMSE for Disparity: {np.mean(rmse_disparity_list):.4f}")
+    print(f"Average RMSE for Depth: {np.mean(rmse_depth_list):.4f}")
