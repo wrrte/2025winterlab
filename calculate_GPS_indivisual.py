@@ -5,7 +5,6 @@ import subprocess
 import re
 import glob
 import os
-
 import time
 
 def load_pfm(file_path):
@@ -28,38 +27,38 @@ def load_pfm(file_path):
         
         return np.reshape(data, shape), scale
 
-def calculate_absolute_distance(depth_map, ref_distance, ref_point):
-    height, width = depth_map.shape[:2]
-
-    # Use the provided reference point
+def calculate_absolute_distance_for_point(depth_map, ref_distance, ref_point, target_point):
+    # Get depth values for reference and target points
     ref_depth_value = depth_map[ref_point[1], ref_point[0]]
     max_depth_value = np.max(depth_map)
-
+    target_depth_value = depth_map[int(target_point[1]), int(target_point[0])]
+    
+    # Calculate ratio using reference point
     ratio = ref_distance / (ref_depth_value - max_depth_value)
+    
+    # Calculate absolute distance for target point
+    absolute_distance = np.abs(((max_depth_value - target_depth_value) * ratio))**3
+    
+    return absolute_distance
 
-    absolute_distances = np.abs(((max_depth_value - depth_map) * ratio))**3
-
-    return absolute_distances
-
-def calculate_angle_and_distance(image_width, image_height, target_x, depth_map, ref_distance, FOV):
+def calculate_angle_and_distance(image_width, image_height, target_x, target_y, depth_map, ref_distance, ref_point, FOV):
     cx = image_width // 2
-
     dx = target_x - cx
-
     theta = (dx / (image_width / 2)) * (FOV / 2)
-
-    target_x_int = int(target_x)
-    target_y_int = int(image_height // 2)
-    absolute_distance = depth_map[target_y_int, target_x_int] * ref_distance
-
+    
+    absolute_distance = calculate_absolute_distance_for_point(
+        depth_map, 
+        ref_distance, 
+        ref_point, 
+        (target_x, target_y)
+    )
+    
     return theta, absolute_distance
 
 def calculate_gps_coordinates(current_gps, heading, angle, distance):
     actual_angle = (heading + angle) % 360
-
     origin = geopy.Point(current_gps[0], current_gps[1])
     destination = geopy.distance.distance(meters=distance).destination(origin, actual_angle)
-
     return destination.latitude, destination.longitude
 
 def run_detection_script(detection_script_path):
@@ -67,7 +66,6 @@ def run_detection_script(detection_script_path):
     output = result.stdout
 
     detection_points = []
-
     pattern = r'Center \(x, y\): \(([\d.]+), ([\d.]+)\)'
     matches = re.findall(pattern, output)
 
@@ -77,37 +75,33 @@ def run_detection_script(detection_script_path):
 
     return detection_points
 
-def run_dpt_and_get_latest_pfm(pfm_folder_path, pfm_file_name):
-    # run_dpt.py 실행
+def run_dpt_and_get_latest_pfm(pfm_folder_path):
+    # Run run_dpt.py
     result = subprocess.run(['python', 'run_dpt.py'], capture_output=True, text=True)
     if result.returncode != 0:
-        print("run_dpt.py 실행 중 오류가 발생했습니다.")
+        print("Error running run_dpt.py")
         print(result.stderr)
         exit(1)
 
-    latest_pfm_file = glob.glob(os.path.join(pfm_folder_path, f'{pfm_file_name}.pfm'))
-    
-    '''
-    # PFM 폴더에서 가장 최근에 생성된 PFM 파일 찾기
-    pfm_files = [f for f in glob.glob(os.path.join(pfm_folder_path, '*.pfm')) if f.endswith('.pfm')]
+    # Find most recent PFM file
+    pfm_files = [f for f in glob.glob(os.path.join(pfm_folder_path, '*.pfm'))]
     if not pfm_files:
-        print(f"PFM 파일을 찾을 수 없습니다: {pfm_folder_path}")
+        print(f"No PFM files found in: {pfm_folder_path}")
         exit(1)
 
-    latest_pfm_file = max(pfm_files, key=os.path.getctime)  # 가장 최근에 수정된 파일
-    print(f"가장 최근에 생성된 PFM 파일: {latest_pfm_file}")
-    '''
+    latest_pfm_file = max(pfm_files, key=os.path.getctime)
+    print(f"Most recent PFM file: {latest_pfm_file}")
 
     return latest_pfm_file
 
 def get_latest_reference_point(record_dir):
-    txt_files = [f for f in glob.glob(os.path.join(record_dir, '*.txt')) if f.endswith('.txt')]
+    txt_files = [f for f in glob.glob(os.path.join(record_dir, '*.txt'))]
     if not txt_files:
-        print(f"참조 지점을 찾을 수 없습니다: {record_dir}")
+        print(f"No reference points found in: {record_dir}")
         return None
 
     latest_txt_file = max(txt_files, key=os.path.getctime)
-    print(f"가장 최근에 생성된 텍스트 파일: {latest_txt_file}")
+    print(f"Most recent text file: {latest_txt_file}")
 
     with open(latest_txt_file, 'r') as file:
         line = file.readline()
@@ -118,59 +112,56 @@ def get_latest_reference_point(record_dir):
     return None
 
 def predict_detection_points_gps(detection_script_path, pfm_folder_path, record_dir, current_gps, heading, ref_distance, FOV):
-    
     global inference_time
     
     ref_point = get_latest_reference_point(record_dir)
     if ref_point is None:
-        print("참조 지점을 찾을 수 없습니다.")
+        print("Reference point not found.")
         return []
 
-    pfm_file_path = run_dpt_and_get_latest_pfm(pfm_folder_path, )
+    pfm_file_path = run_dpt_and_get_latest_pfm(pfm_folder_path)
 
     start_time = time.time()
 
     depth_map, scale = load_pfm(pfm_file_path)
     height, width = depth_map.shape[:2]
+    
+    detection_points = run_detection_script(detection_script_path)
+    
+    predicted_gps_points = []
+    for point in detection_points:
+        target_x, target_y = point
+        
+        angle, distance = calculate_angle_and_distance(
+            width, height, target_x, target_y, 
+            depth_map, ref_distance, ref_point, FOV
+        )
 
-    absolute_distances = calculate_absolute_distance(depth_map, ref_distance, ref_point)
+        predicted_gps = calculate_gps_coordinates(current_gps, heading, angle, distance)
+        predicted_gps_points.append((predicted_gps, angle, distance))
 
     end_time = time.time()
     tot_time = end_time - start_time
     inference_time.append(tot_time)
 
-    detection_points = run_detection_script(detection_script_path)
-
-    predicted_gps_points = []
-
-    for point in detection_points:
-        target_x, target_y = point
-
-        angle, distance = calculate_angle_and_distance(width, height, target_x, absolute_distances, ref_distance, FOV)
-
-        predicted_gps = calculate_gps_coordinates(current_gps, heading, angle, distance)
-        predicted_gps_points.append((predicted_gps, angle, distance))
-
     return predicted_gps_points
 
-# 예제 사용
-current_gps = (36.370077, 127.379437)  # 현재 GPS 위치 (위도, 경도)
-heading = 180  # 카메라의 현재 바라보는 방향 (서쪽 85도)
-reference_distance = 2.5  # 참조 지점의 실제 거리 (미터)
-FOV = 72  # 화각 72도
-pfm_folder_path = 'dpt_output/'  # PFM 파일이 저장된 폴더 경로
-detection_script_path = 'run_bd.py'  # building detection 파일 경로
-record_dir = 'roadview/reference_point'  # 텍스트 파일이 저장된 폴더 경로
+# Example usage
+current_gps = (36.370077, 127.379437)  # Current GPS position (latitude, longitude)
+heading = 180  # Camera heading (180 degrees)
+reference_distance = 2.5  # Reference point actual distance (meters)
+FOV = 72  # Field of view 72 degrees
+pfm_folder_path = 'dpt_output/'  # PFM files folder path
+detection_script_path = 'run_bd.py'  # Building detection script path
+record_dir = 'roadview/reference_point'  # Text files folder path
 
 inference_time = []
 
-predicted_gps_points = predict_detection_points_gps(detection_script_path, pfm_folder_path, record_dir, current_gps, heading, reference_distance, FOV)
+predicted_gps_points = predict_detection_points_gps(
+    detection_script_path, pfm_folder_path, record_dir,
+    current_gps, heading, reference_distance, FOV
+)
 
-# 결과 출력
+# Print results
 for i, (gps, angle, distance) in enumerate(predicted_gps_points):
-    print(f"Detection point {i+1}의 예측 GPS 좌표: {gps}, 각도: {angle:.2f}도, 거리: {distance:.2f}미터")
-
-tt = 0
-for i in inference_time:
-    tt += i
-print(tt/len(inference_time))
+    print(f"Detection point {i+1} predicted GPS coordinates: {gps}, angle: {angle:.2f}°, distance: {distance:.2f}m")

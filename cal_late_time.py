@@ -82,28 +82,37 @@ def predict_detection_points_gps(pfm_file_path, record_dir, ref_distance):
     depth_map, scale = load_pfm(pfm_file_path)
     height, width = depth_map.shape[:2]
 
+    middle_time = time.time()
+
     absolute_distances = calculate_absolute_distance(depth_map, ref_distance, ref_point)
 
     end_time = time.time()
     tot_time = end_time - start_time
 
-    return tot_time
+    return end_time - start_time, end_time - middle_time
 
 # 예제 사용
 reference_distance = 2.5  # 참조 지점의 실제 거리 (미터)
 pfm_folder_path = 'dpt_output/'  # PFM 파일이 저장된 폴더 경로
 record_dir = 'roadview/reference_point'  # 텍스트 파일이 저장된 폴더 경로
 
-inference_time = []
+tot_times = []
+cal_times = []
 
 files = glob.glob(os.path.join(pfm_folder_path, '*.pfm'))
 
 for pfm_file_path in files:
-    inference_time.append(predict_detection_points_gps(pfm_file_path, record_dir, reference_distance))
+    tt, mt = predict_detection_points_gps(pfm_file_path, record_dir, reference_distance)
+    tot_times.append(tt)
+    cal_times.append(mt)
 
 
-tt = 0
-for i in inference_time:
-    tt += i
-print(inference_time)
-print(tt/len(inference_time))
+tsum = 0
+csum = 0
+for i in len(tot_times):
+    tsum += tot_times[i]
+    csum += cal_times[i]
+print(tot_times)
+print(cal_times)
+print(tsum/len(tot_times))
+print(csum/len(tot_times))
