@@ -19,7 +19,7 @@ import numpy as np
 #from util.misc import visualize_attention
 
 
-def run(input_path, output_path, model_path, model_type="dpt_monodepth", optimize=True, cuda_NUM=0):
+def run(input_path, output_path, model_path, model_type="dpt_monodepth", optimize=True, cuda_NUM=1):
     """Run MonoDepthNN to compute depth maps.
 
     Args:
@@ -33,7 +33,7 @@ def run(input_path, output_path, model_path, model_type="dpt_monodepth", optimiz
     print("initialize")
 
     # select device (set to GPU cuda_NUM)
-    device = torch.device(f"cuda:{cuda_NUM}" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cpu")
     print(f"device: {device}")
 
     # load network
