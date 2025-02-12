@@ -97,7 +97,7 @@ def process_image_set(image_base_name, pfm_folder_path, bb_results_folder, recor
 
     # Construct file paths
     pfm_file = os.path.join(pfm_folder_path, f"{image_base_name}.pfm")
-    bb_result_file = os.path.join(bb_results_folder, f"{image_base_name}_bb.txt")
+    bb_result_file = os.path.join(bb_results_folder, f"{image_base_name}.txt")
 
     # Check if both files exist
     if not (os.path.exists(pfm_file) and os.path.exists(bb_result_file)):
@@ -153,7 +153,7 @@ heading = 180  # Camera heading
 reference_distance = 2.5  # Reference point distance (meters)
 FOV = 72  # Field of view
 pfm_folder_path = 'dpt_output/'  # PFM files folder
-bb_results_folder = 'bb_output/'  # Bounding box results folder
+bb_results_folder = 'bb_output/coordinate'  # Bounding box results folder
 record_dir = 'roadview/reference_point'  # Reference point folder
 
 # Process all images

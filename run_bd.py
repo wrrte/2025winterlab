@@ -32,7 +32,7 @@ def draw_bounding_boxes(image_path, results, output_image_path, output_coords_pa
                 f.write(f"{cls_id} {conf} {x_min/width} {y_min/height} {x_max/width} {y_max/height}\n")
                 
                 # 중심 좌표 출력
-                print(f"Class ID: {cls_id}, Confidence: {conf}, Center (x, y): ({x_center}, {y_center})")
+                #print(f"Class ID: {cls_id}, Confidence: {conf}, Center (x, y): ({x_center}, {y_center})")
     
     # 결과 이미지를 지정된 경로에 저장
     cv2.imwrite(output_image_path, image)
@@ -52,12 +52,12 @@ for source_image_path in image_files:
     file_name = os.path.basename(source_image_path)  
     file_name_without_ext = os.path.splitext(file_name)[0]  # 확장자를 제외한 파일명
     
-    print(f"Processing image: {source_image_path}")
+    #print(f"Processing image: {source_image_path}")
     
     # 결과를 저장할 경로 설정
-    output_image_path = f'bd_output/image/{file_name_without_ext}-{args.model_type}.png'
-    output_coords_path = f'bd_output/coordinate/{file_name_without_ext}-{args.model_type}.txt'
-    visualize_image_path = f'bd_output/visualize/{file_name_without_ext}-{args.model_type}-visualized.png'
+    output_image_path = f'bd_output/image/{file_name_without_ext}.png'
+    output_coords_path = f'bd_output/coordinate/{file_name_without_ext}.txt'
+    visualize_image_path = f'bd_output/visualize/{file_name_without_ext}-visualized.png'
     
     # 추론 수행
     results = model(source_image_path)
