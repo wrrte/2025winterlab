@@ -1,4 +1,6 @@
 .vscode/
+bd_output/
+dpt_output/
 type_origin/weights/dpt_hybrid/
 GS1GEO/south-korea-latest.osm.pbf
 type_origin/train_bd/test/
