@@ -1,7 +1,7 @@
 from ultralytics.models import YOLO
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]="1" # 0, 1
+os.environ["CUDA_VISIBLE_DEVICES"]="0" # 0, 1
 
 #nvitop -m compact --only-compute
 #duf --style ascii
