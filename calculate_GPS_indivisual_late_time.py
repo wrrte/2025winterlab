@@ -59,16 +59,20 @@ def calculate_gps_coordinates(current_gps, heading, angle, distance):
     return destination.latitude, destination.longitude
 
 def get_detection_points_from_file(result_file):
-    with open(result_file, 'r') as f:
-        content = f.read()
-    
-    detection_points = []
-    pattern = r'Center \(x, y\): \(([\d.]+), ([\d.]+)\)'
-    matches = re.findall(pattern, content)
 
-    for match in matches:
-        x, y = map(float, match)
-        detection_points.append((x, y))
+    detection_points = []
+
+    with open(result_file, "r") as f:
+        for line in f:
+            values = list(map(float, line.split()))  # 문자열을 실수(float) 리스트로 변환
+            
+            if len(values) < 5:  # 최소 5개의 값이 있어야 x, y를 계산할 수 있음
+                continue
+            
+            x = (values[1] + values[3]) / 2  # 두 번째와 네 번째 값의 평균
+            y = (values[2] + values[4]) / 2  # 세 번째와 다섯 번째 값의 평균
+
+            detection_points.append((x, y))
 
     return detection_points
 
@@ -79,7 +83,7 @@ def get_latest_reference_point(record_dir):
         return None
 
     latest_txt_file = max(txt_files, key=os.path.getctime)
-    print(f"Most recent text file: {latest_txt_file}")
+    #print(f"Most recent text file: {latest_txt_file}")
 
     with open(latest_txt_file, 'r') as file:
         line = file.readline()
@@ -101,7 +105,12 @@ def process_image_set(image_base_name, pfm_folder_path, bb_results_folder, recor
 
     # Check if both files exist
     if not (os.path.exists(pfm_file) and os.path.exists(bb_result_file)):
-        print(f"Missing files for {image_base_name}")
+        if not os.path.exists(pfm_file):
+            print(f"Missing pfm for {image_base_name}")
+        elif not os.path.exists(bb_result_file):
+            print(f"Missing {bb_result_file}")
+        else:
+            print("sadfsdfsadf")
         return []
 
     # Load depth map
@@ -120,7 +129,7 @@ def process_image_set(image_base_name, pfm_folder_path, bb_results_folder, recor
             depth_map, ref_distance, ref_point, FOV
         )
 
-
+    if(len(detection_points)==0): return 0
 
     return tt/len(detection_points)
 
@@ -153,7 +162,7 @@ heading = 180  # Camera heading
 reference_distance = 2.5  # Reference point distance (meters)
 FOV = 72  # Field of view
 pfm_folder_path = 'dpt_output/'  # PFM files folder
-bb_results_folder = 'bb_output/coordinate'  # Bounding box results folder
+bb_results_folder = 'bd_output/coordinate'  # Bounding box results folder
 record_dir = 'roadview/reference_point'  # Reference point folder
 
 # Process all images
