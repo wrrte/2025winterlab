@@ -164,7 +164,7 @@ def run(input_path, output_path, model_path, model_type="dpt_monodepth", optimiz
         filename = os.path.join(
             output_path, os.path.splitext(os.path.basename(img_name))[0]
         )
-        util.io.write_depth(f"{filename}_{model_type}", prediction, bits=1, absolute_depth=args.absolute_depth)
+        util.io.write_depth(f"{filename}", prediction, bits=1, absolute_depth=args.absolute_depth)
 
     print("finished")
 

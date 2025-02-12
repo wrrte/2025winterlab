@@ -109,7 +109,7 @@ for pfm_file_path in files:
 
 tsum = 0
 csum = 0
-for i in len(tot_times):
+for i in range(len(tot_times)):
     tsum += tot_times[i]
     csum += cal_times[i]
 print(tot_times)
