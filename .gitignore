@@ -15,3 +15,4 @@ bd_output
 requirements/requirements3/settings.json
 requirements/requirements3/yolov11.yaml
 type_choemj/datasets/
+weights/dpt_hybrid
