@@ -77,14 +77,17 @@ def run_detection_script(detection_script_path):
 
     return detection_points
 
-def run_dpt_and_get_latest_pfm(pfm_folder_path):
+def run_dpt_and_get_latest_pfm(pfm_folder_path, pfm_file_name):
     # run_dpt.py 실행
     result = subprocess.run(['python', 'run_dpt.py'], capture_output=True, text=True)
     if result.returncode != 0:
         print("run_dpt.py 실행 중 오류가 발생했습니다.")
         print(result.stderr)
         exit(1)
+
+    latest_pfm_file = glob.glob(os.path.join(pfm_folder_path, f'{pfm_file_name}.pfm'))
     
+    '''
     # PFM 폴더에서 가장 최근에 생성된 PFM 파일 찾기
     pfm_files = [f for f in glob.glob(os.path.join(pfm_folder_path, '*.pfm')) if f.endswith('.pfm')]
     if not pfm_files:
@@ -93,6 +96,7 @@ def run_dpt_and_get_latest_pfm(pfm_folder_path):
 
     latest_pfm_file = max(pfm_files, key=os.path.getctime)  # 가장 최근에 수정된 파일
     print(f"가장 최근에 생성된 PFM 파일: {latest_pfm_file}")
+    '''
 
     return latest_pfm_file
 
@@ -114,16 +118,26 @@ def get_latest_reference_point(record_dir):
     return None
 
 def predict_detection_points_gps(detection_script_path, pfm_folder_path, record_dir, current_gps, heading, ref_distance, FOV):
+    
+    global inference_time
+    
     ref_point = get_latest_reference_point(record_dir)
     if ref_point is None:
         print("참조 지점을 찾을 수 없습니다.")
         return []
 
-    pfm_file_path = run_dpt_and_get_latest_pfm(pfm_folder_path)
+    pfm_file_path = run_dpt_and_get_latest_pfm(pfm_folder_path, )
+
+    start_time = time.time()
+
     depth_map, scale = load_pfm(pfm_file_path)
     height, width = depth_map.shape[:2]
 
     absolute_distances = calculate_absolute_distance(depth_map, ref_distance, ref_point)
+
+    end_time = time.time()
+    tot_time = end_time - start_time
+    inference_time.append(tot_time)
 
     detection_points = run_detection_script(detection_script_path)
 
@@ -148,8 +162,15 @@ pfm_folder_path = 'dpt_output/'  # PFM 파일이 저장된 폴더 경로
 detection_script_path = 'run_bd.py'  # building detection 파일 경로
 record_dir = 'roadview/reference_point'  # 텍스트 파일이 저장된 폴더 경로
 
+inference_time = []
+
 predicted_gps_points = predict_detection_points_gps(detection_script_path, pfm_folder_path, record_dir, current_gps, heading, reference_distance, FOV)
 
 # 결과 출력
 for i, (gps, angle, distance) in enumerate(predicted_gps_points):
     print(f"Detection point {i+1}의 예측 GPS 좌표: {gps}, 각도: {angle:.2f}도, 거리: {distance:.2f}미터")
+
+tt = 0
+for i in inference_time:
+    tt += i
+print(tt/len(inference_time))
