@@ -77,7 +77,7 @@ def run_detection_script(detection_script_path):
 
 def run_dpt_and_get_latest_pfm(pfm_folder_path):
     # Run run_dpt.py
-    result = subprocess.run(['python', 'run_dpt_test_cal.py'], capture_output=True, text=True)
+    result = subprocess.run(['python', 'run_dpt.py'], capture_output=True, text=True)
     if result.returncode != 0:
         print("Error running run_dpt.py")
         print(result.stderr)
