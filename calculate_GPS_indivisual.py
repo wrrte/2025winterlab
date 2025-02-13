@@ -145,7 +145,7 @@ current_gps = (36.370077, 127.379437)  # Current GPS position (latitude, longitu
 heading = 180  # Camera heading (180 degrees)
 reference_distance = 2.5  # Reference point actual distance (meters)
 FOV = 72  # Field of view 72 degrees
-pfm_folder_path = 'dpt_output_test_cal/'  # PFM files folder path
+pfm_folder_path = 'dpt_output/'  # PFM files folder path
 detection_script_path = 'run_bd.py'  # Building detection script path
 record_dir = 'roadview/reference_point'  # Text files folder path
 
