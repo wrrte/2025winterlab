@@ -9,5 +9,3 @@ nc: 1
 
 # 클래스 이름
 names: ['building']
-
-weights: /mnt/hdd_4A/choemj/2025winterlab/type_traintrain/best.pt
