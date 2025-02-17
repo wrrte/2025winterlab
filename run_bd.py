@@ -4,11 +4,13 @@ import glob
 import os
 import argparse
 
+os.environ["CUDA_VISIBLE_DEVICES"]="3" # 0, 1
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-t", "--model_type", default="m", help="yolo model type you want to run")
 args = parser.parse_args()
 #model = YOLO(f"/mnt/hdd_4A/choemj/2025winterlab/weights/trained/train_{args.model_type}/weights/best.pt")
-model = YOLO("/mnt/hdd_4A/choemj/2025winterlab/type_30000/weight/30000_n/weights/best.pt")
+model = YOLO("/mnt/hdd_4A/choemj/2025winterlab/type_30000/weight/train2/weights/best.pt")
 
 def draw_bounding_boxes(image_path, results, output_image_path, output_coords_path, visualize_image_path, confidence_threshold=0.3):
     image = cv2.imread(image_path)
@@ -32,7 +34,7 @@ def draw_bounding_boxes(image_path, results, output_image_path, output_coords_pa
                 f.write(f"{cls_id} {conf} {x_min/width} {y_min/height} {x_max/width} {y_max/height}\n")
                 
                 # 중심 좌표 출력
-                #print(f"Class ID: {cls_id}, Confidence: {conf}, Center (x, y): ({x_center}, {y_center})")
+                print(f"Class ID: {cls_id}, Confidence: {conf}, Center (x, y): ({x_center}, {y_center})")
     
     # 결과 이미지를 지정된 경로에 저장
     cv2.imwrite(output_image_path, image)
