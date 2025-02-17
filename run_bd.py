@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-t", "--model_type", default="m", help="yolo model type you want to run")
 args = parser.parse_args()
 #model = YOLO(f"/mnt/hdd_4A/choemj/2025winterlab/weights/trained/train_{args.model_type}/weights/best.pt")
-model = YOLO("/mnt/hdd_4A/seyeon/2025winterlab/type_seyeon/weights/bd_trained/train10/weights/best.pt")
+model = YOLO("/mnt/hdd_4A/choemj/2025winterlab/type_30000/weight/30000_n/weights/best.pt")
 
 def draw_bounding_boxes(image_path, results, output_image_path, output_coords_path, visualize_image_path, confidence_threshold=0.3):
     image = cv2.imread(image_path)
