@@ -7,9 +7,12 @@ import os
 from geopy.distance import geodesic
 from PIL import Image, ImageDraw, ImageFont
 
+dpt_type = "pfm"
+#dpt_type = "stereo"
+
 # gps_est.py 스크립트를 실행하고 출력을 캡처
 print("Running calculate_GPS.py to get estimated GPS coordinates...\n")
-result = subprocess.run(["python3", "calculate_GPS.py"], capture_output=True, text=True)
+result = subprocess.run(["python3", "calculate_GPS.py", dpt_type], capture_output=True, text=True)
 
 # 출력된 내용을 문자열로 가져옴
 output = result.stdout
