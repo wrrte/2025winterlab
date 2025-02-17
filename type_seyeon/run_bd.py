@@ -4,10 +4,12 @@ import glob
 import os
 import argparse
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-t", "--model_type", default="m", help="yolo model type you want to run")
-args = parser.parse_args()
-model = YOLO(f"runs/detect/train_{args.model_type}/weights/best.pt")
+# parser = argparse.ArgumentParser()
+# parser.add_argument("-t", "--model_type", default="m", help="yolo model type you want to run")
+# args = parser.parse_args()
+# model = YOLO(f"runs/detect/train_{args.model_type}/weights/best.pt")
+MODEL_PATH = "/home/seyeon/2025winterlab/type_seyeon/weights/bd_trained/train10/weights/last.pt"
+model = YOLO(MODEL_PATH)
 
 def draw_bounding_boxes(image_path, results, output_image_path, output_coords_path, visualize_image_path, confidence_threshold=0.3):
     image = cv2.imread(image_path)
@@ -48,7 +50,8 @@ def draw_bounding_boxes(image_path, results, output_image_path, output_coords_pa
 #   
 
 # roadview/image 폴더 내의 모든 PNG 이미지 검색
-image_files = glob.glob('roadview/image/*.png')  
+# image_files = glob.glob('roadview/image/*.png')  
+image_files = glob.glob('/home/seyeon/2025winterlab/type_seyeon/test/test2_left/*.png')  
 if not image_files:
     print("No images found in the roadview folder.")
     exit(1)
@@ -62,10 +65,14 @@ for source_image_path in image_files:
     print(f"Processing image: {source_image_path}")
     
     # 결과를 저장할 경로 설정
-    output_image_path = f'bd_output/image/{file_name_without_ext}-{args.model_type}.png'
-    output_coords_path = f'bd_output/coordinate/{file_name_without_ext}-{args.model_type}.txt'
-    visualize_image_path = f'bd_output/visualize/{file_name_without_ext}-{args.model_type}-visualized.png'
-    
+    # output_image_path = f'bd_output/image/{file_name_without_ext}-{args.model_type}.png'
+    # output_coords_path = f'bd_output/coordinate/{file_name_without_ext}-{args.model_type}.txt'
+    # visualize_image_path = f'bd_output/visualize/{file_name_without_ext}-{args.model_type}-visualized.png'
+    output_image_path = f'type_seyeon/bboxtest/image/{file_name_without_ext}-test.png'
+    output_coords_path = f'type_seyeon/bboxtest/coordinate/{file_name_without_ext}-test.txt'
+    visualize_image_path = f'type_seyeon/bboxtest/visualize/{file_name_without_ext}-test-visualized.png'
+
+
     # 추론 수행
     results = model(source_image_path)
     

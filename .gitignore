@@ -12,12 +12,12 @@ type_origin/weights/bd_trained/train_x
 bd_output
 requirements/requirements3/settings.json
 requirements/requirements3/yolov11.yaml
-type_seyeon/test/test_disparity
-type_seyeon/test/test_depth
-type_seyeon/test/test_left
-type_seyeon/test/test_right
 type_seyeon/test/train_right
 type_seyeon/test/train_left
 type_seyeon/test/train_disparity
 type_seyeon/test/train_depth
+type_seyeon/test/test_disparity
+type_seyeon/test/test_depth
+type_seyeon/test/test_left
+type_seyeon/test/test_right
 
