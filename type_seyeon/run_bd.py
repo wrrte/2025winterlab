@@ -40,15 +40,6 @@ def draw_bounding_boxes(image_path, results, output_image_path, output_coords_pa
     # 바운딩 박스가 그려진 이미지를 visualize 폴더에 저장
     cv2.imwrite(visualize_image_path, image)
 
-
-#left_image_files =  glob.glob('roadview/image/*_left.png')  
-#right_image_files =  glob.glob('roadview/image/*_right.png')  
-
-# for left_image, right_image in zip(left_image_files, right_image_files):
-#   left_result = model(left_image)
-#   right_result = model(right_image)
-#   
-
 # roadview/image 폴더 내의 모든 PNG 이미지 검색
 # image_files = glob.glob('roadview/image/*.png')  
 image_files = glob.glob('/home/seyeon/2025winterlab/type_seyeon/test/test2_left/*.png')  

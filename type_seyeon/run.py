@@ -10,8 +10,8 @@ MODEL_PATH = "/home/seyeon/2025winterlab/type_seyeon/weights/bd_trained/train10/
 model = YOLO(MODEL_PATH)
 
 # Depth calculation constants
-F = 1
-B = 1
+F = 1 # focal length
+B = 1 # baseline
 
 def draw_bounding_boxes(image_path, results, output_coords_path, confidence_threshold=0.3):
     image = cv2.imread(image_path)
@@ -38,14 +38,14 @@ def draw_bounding_boxes(image_path, results, output_coords_path, confidence_thre
     return image, valid_boxes
 
  
-left_imgs = sorted(glob.glob("/home/seyeon/2025winterlab/type_seyeon/test/test2_left/*.png")) # 왼쪽 카메라 dir
-right_imgs = sorted(glob.glob("/home/seyeon/2025winterlab/type_seyeon/test/test2_right/*.png")) # 오른쪽 카메라 dir
+left_imgs = sorted(glob.glob("/home/seyeon/2025winterlab/type_seyeon/test/test_left/*.png")) # 왼쪽 카메라 dir
+right_imgs = sorted(glob.glob("/home/seyeon/2025winterlab/type_seyeon/test/test_right/*.png")) # 오른쪽 카메라 dir
 
 if not left_imgs or len(left_imgs) != len(right_imgs):
     print("Missing images or missmatch in the input images.")
     exit(1)
 
-output_dir = "/home/seyeon/2025winterlab/type_seyeon/test/test2_results"
+output_dir = "/home/seyeon/2025winterlab/type_seyeon/test/test_results" # 경로
 os.makedirs(f"{output_dir}/images", exist_ok=True)
 os.makedirs(f"{output_dir}/coordinates", exist_ok=True)
 os.makedirs(f"{output_dir}/disparity", exist_ok=True)
@@ -55,8 +55,6 @@ os.makedirs(f"{output_dir}/depth", exist_ok=True)
 for left_img_path, right_img_path in zip(left_imgs, right_imgs):
     base_filename = os.path.basename(left_img_path)
 
-    # left_img = cv2.imread(left_img_path)
-    # right_img = cv2.imread(right_img_path)
 
     batch_results = model([left_img_path, right_img_path], device = "cuda")
     left_results, right_results = batch_results
