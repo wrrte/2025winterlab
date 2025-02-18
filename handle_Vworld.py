@@ -8,6 +8,7 @@ import os
 from geopy.distance import geodesic
 from PIL import Image, ImageDraw, ImageFont
 
+
 dpt_type = "pfm"
 #dpt_type = "stereo"
 
