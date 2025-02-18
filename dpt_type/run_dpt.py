@@ -19,7 +19,7 @@ import numpy as np
 #from util.misc import visualize_attention
 
 
-def run(input_path, output_path, model_path, model_type="dpt_monodepth", optimize=True, cuda_NUM=1):
+def run_dpt(input_file, output_path = 'dpt_type/dpt_output/', model_path = "weights/dpt_hybrid/dpt_monodepth.pt", model_type="dpt_monodepth", optimize=True):
     """Run MonoDepthNN to compute depth maps.
 
     Args:
@@ -33,7 +33,7 @@ def run(input_path, output_path, model_path, model_type="dpt_monodepth", optimiz
     print("initialize")
 
     # select device (set to GPU cuda_NUM)
-    device = torch.device("cpu")
+    device = torch.device("cuda")
     print(f"device: {device}")
 
     # load network
@@ -103,70 +103,70 @@ def run(input_path, output_path, model_path, model_type="dpt_monodepth", optimiz
     model.to(device)
 
     # get input
-    img_names = glob.glob(os.path.join(input_path, "*"))
-    num_images = len(img_names)
+    latest_imgs = glob.glob(input_file)
+    latest_img = max(latest_imgs, key=os.path.getctime)
+
+    print(latest_img)
 
     # create output folder
     os.makedirs(output_path, exist_ok=True)
 
     print("start processing")
-    for ind, img_name in enumerate(img_names):
-        if os.path.isdir(img_name):
-            continue
 
-        #print(f"  processing {img_name} ({ind + 1}/{num_images})")
-        img = util.io.read_image(img_name)
+    #print(f"  processing {latest_img} ({ind + 1}/{num_images})")
+    img = util.io.read_image(latest_img)
 
-        # 디버깅 코드 추가: 입력 이미지 확인
-        if img is None:
-            raise ValueError(f"Input image at {img_name} could not be loaded!")
-        #print(f"Input image shape: {img.shape}, range: [{img.min()}, {img.max()}]")
+    # 디버깅 코드 추가: 입력 이미지 확인
+    if img is None:
+        raise ValueError(f"Input image at {latest_img} could not be loaded!")
+    #print(f"Input image shape: {img.shape}, range: [{img.min()}, {img.max()}]")
 
-        if model_type == "dpt_kitti" and args.kitti_crop:
-            height, width, _ = img.shape
-            top = height - 352
-            left = (width - 1216) // 2
-            img = img[top : top + 352, left : left + 1216, :]
+    if model_type == "dpt_kitti" and args.kitti_crop:
+        height, width, _ = img.shape
+        top = height - 352
+        left = (width - 1216) // 2
+        img = img[top : top + 352, left : left + 1216, :]
 
-        img_input = transform({"image": img})["image"]
-        # 디버깅 코드 추가: 전처리된 입력 데이터 확인
-        #print(f"Preprocessed input tensor shape: {img_input.shape}, " f"Raw range: [{img_input.min()}, {img_input.max()}]")
+    img_input = transform({"image": img})["image"]
+    # 디버깅 코드 추가: 전처리된 입력 데이터 확인
+    #print(f"Preprocessed input tensor shape: {img_input.shape}, " f"Raw range: [{img_input.min()}, {img_input.max()}]")
 
-        # compute
-        with torch.no_grad():
-            sample = torch.from_numpy(img_input).to(device).unsqueeze(0)
+    # compute
+    with torch.no_grad():
+        sample = torch.from_numpy(img_input).to(device).unsqueeze(0)
 
-            if optimize == True and device.type == 'cuda':
-                sample = sample.to(memory_format=torch.channels_last)
-                sample = sample.half()
+        if optimize == True and device.type == 'cuda':
+            sample = sample.to(memory_format=torch.channels_last)
+            sample = sample.half()
 
-            prediction = model.forward(sample)
-            # 디버깅 코드 추가: 모델 출력 확인
-            #print(f"Model output shape: {prediction.shape}, " f"range: [{prediction.min()}, {prediction.max()}]")
-            prediction = (
-                torch.nn.functional.interpolate(
-                    prediction.unsqueeze(1),
-                    size=img.shape[:2],
-                    mode="bicubic",
-                    align_corners=False,
-                )
-                .squeeze()
-                .cpu()
-                .numpy()
+        prediction = model.forward(sample)
+        # 디버깅 코드 추가: 모델 출력 확인
+        #print(f"Model output shape: {prediction.shape}, " f"range: [{prediction.min()}, {prediction.max()}]")
+        prediction = (
+            torch.nn.functional.interpolate(
+                prediction.unsqueeze(1),
+                size=img.shape[:2],
+                mode="bicubic",
+                align_corners=False,
             )
-
-            if model_type == "dpt_kitti":
-                prediction *= 256
-
-            if model_type == "dpt_nyu":
-                prediction *= 1000.0
-
-        filename = os.path.join(
-            output_path, os.path.splitext(os.path.basename(img_name))[0]
+            .squeeze()
+            .cpu()
+            .numpy()
         )
-        util.io.write_depth(f"{filename}", prediction, bits=1, absolute_depth=args.absolute_depth)
+
+        if model_type == "dpt_kitti":
+            prediction *= 256
+
+        if model_type == "dpt_nyu":
+            prediction *= 1000.0
 
     print("finished")
+
+    print(prediction.shape)
+
+    return prediction
+
+    
 
 
 

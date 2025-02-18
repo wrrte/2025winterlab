@@ -13,7 +13,11 @@ args = parser.parse_args()
 #model = YOLO("/mnt/hdd_4A/choemj/2025winterlab/type_30000/weight/train3/weights/best.pt")
 model = YOLO("/mnt/hdd_4A/choemj/2025winterlab/type_xloss/weights/train/weights/best.pt")
 
-def draw_bounding_boxes(image_path, results, output_image_path, output_coords_path, visualize_image_path, confidence_threshold=0.3):
+def run_bd(image_path, model, output_image_path = 'dpt_type/bd_output/image/result.png', output_coords_path='dpt_type/bd_output/coordinate/result.txt', visualize_image_path='dpt_type/bd_output/visualize/result.png', confidence_threshold=0.3):
+    
+    
+    results = model(image_path, imgsz=640)
+
     image = cv2.imread(image_path)
     height, width = image.shape[:2]
     
@@ -21,6 +25,8 @@ def draw_bounding_boxes(image_path, results, output_image_path, output_coords_pa
     confidences = results[0].boxes.conf.cpu().numpy()     # 신뢰도
     class_ids = results[0].boxes.cls.cpu().numpy()        # 클래스 ID
     
+    detection_points = []
+
     with open(output_coords_path, 'w') as f:
         for bbox, conf, cls_id in zip(bounding_boxes, confidences, class_ids):
             if conf >= confidence_threshold:  # confidence 하한 설정
@@ -34,13 +40,15 @@ def draw_bounding_boxes(image_path, results, output_image_path, output_coords_pa
                 # 바운딩 박스 좌표와 중심 좌표 저장
                 f.write(f"{cls_id} {conf} {x_min/width} {y_min/height} {x_max/width} {y_max/height}\n")
                 
-                # 중심 좌표 출력
-                print(f"Class ID: {cls_id}, Confidence: {conf}, Center (x, y): ({x_center}, {y_center})")
+                # 1층 부근 좌표 출력
+                detection_points.append((x_center, (y_max+y_center)/2))
     
     # 결과 이미지를 지정된 경로에 저장
     cv2.imwrite(output_image_path, image)
     # 바운딩 박스가 그려진 이미지를 visualize 폴더에 저장
     cv2.imwrite(visualize_image_path, image)
+
+    return detection_points
 
 
 # roadview/image 폴더 내의 모든 PNG 이미지 검색
@@ -50,22 +58,21 @@ if not image_files:
     exit(1)
 
 # 이미지 파일 처리
-for source_image_path in image_files:
+for image_path in image_files:
     # 원본 이미지 파일명 추출 (확장자 포함)
-    file_name = os.path.basename(source_image_path)  
+    file_name = os.path.basename(image_path)  
     file_name_without_ext = os.path.splitext(file_name)[0]  # 확장자를 제외한 파일명
     
     #print(f"Processing image: {source_image_path}")
     
     # 결과를 저장할 경로 설정
-    output_image_path = f'bd_output/image/{file_name_without_ext}.png'
-    output_coords_path = f'bd_output/coordinate/{file_name_without_ext}.txt'
-    visualize_image_path = f'bd_output/visualize/{file_name_without_ext}-visualized.png'
+    output_image_path = f'dpt_type/bd_output/image/{file_name_without_ext}.png'
+    output_coords_path = f'dpt_type/bd_output/coordinate/{file_name_without_ext}.txt'
+    visualize_image_path = f'dpt_type/bd_output/visualize/{file_name_without_ext}-visualized.png'
     
     # 추론 수행
-    results = model(source_image_path, imgsz=640)
     
     # 바운딩 박스를 그려서 이미지와 좌표를 저장 (confidence threshold=0.3 적용)
-    draw_bounding_boxes(source_image_path, results, output_image_path, output_coords_path, visualize_image_path, confidence_threshold=0.3)
+    print(run_bd(image_path, model, output_image_path, output_coords_path, visualize_image_path))
     
 print("Processing completed for all images.")
