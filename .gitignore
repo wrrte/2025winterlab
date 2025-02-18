@@ -9,3 +9,4 @@ type_stereo/test/test_disparity
 type_stereo/test/test_left
 type_stereo/test/test_right
 weights/dpt_hybrid
+type_origin/test_dpt/dataset
