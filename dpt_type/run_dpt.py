@@ -19,7 +19,7 @@ import numpy as np
 #from util.misc import visualize_attention
 
 
-def run_dpt(input_file, model_path = "/mnt/hdd_4A/choemj/2025winterlab/weights/dpt_hybrid/dpt_monodepth.pt", model_type="dpt_monodepth", optimize=True):
+def run_dpt(img, model_path = "/mnt/hdd_4A/choemj/2025winterlab/weights/dpt_hybrid/dpt_monodepth.pt", model_type="dpt_monodepth", optimize=True):
     """Run MonoDepthNN to compute depth maps.
 
     Args:
@@ -113,8 +113,7 @@ def run_dpt(input_file, model_path = "/mnt/hdd_4A/choemj/2025winterlab/weights/d
     model.to(device)
 
     #print(f"  processing {input_file} ({ind + 1}/{num_images})")
-    img = util.io.read_image(input_file)
-    print("img type", type(img))
+    
 
     # 디버깅 코드 추가: 입력 이미지 확인
     if img is None:
@@ -219,6 +218,7 @@ if __name__ == "__main__":
     torch.backends.cudnn.benchmark = True
 
     input_file = "roadview/image/*.png"
+    img = util.io.read_image(input_file)
 
     # compute depth maps
     prediction = run_dpt(

@@ -5,11 +5,12 @@ import os
 import argparse
 import torch
 
-def run_bd(image_path, model, output_image_path = 'dpt_type/bd_output/image/result.png', output_coords_path='dpt_type/bd_output/coordinate/result.txt', visualize_image_path='dpt_type/bd_output/visualize/result.png', confidence_threshold=0.3):
+def run_bd(image, model, output_image_path = 'dpt_type/bd_output/image/result.png', output_coords_path='dpt_type/bd_output/coordinate/result.txt', visualize_image_path='dpt_type/bd_output/visualize/result.png', confidence_threshold=0.3):
 
-    results = model(image_path, imgsz=640)
+    
 
-    image = cv2.imread(image_path)
+    results = model(image, imgsz=640)
+
     height, width = image.shape[:2]
     
     bounding_boxes = results[0].boxes.xyxy.cpu().numpy()  # 바운딩 박스 좌표
@@ -69,7 +70,7 @@ if __name__ == "__main__":
 
 
     # roadview/image 폴더 내의 모든 PNG 이미지 검색
-    image_files = glob.glob('roadview/image/*.png')  
+    image_files = glob.glob('roadview/*.png')  
     if not image_files:
         print("No images found in the roadview folder.")
         exit(1)
@@ -88,8 +89,12 @@ if __name__ == "__main__":
         visualize_image_path = f'dpt_type/bd_output/visualize/{file_name_without_ext}-visualized.png'
         
         # 추론 수행
+
+
+
+        image = cv2.imread(image_path)
         
         # 바운딩 박스를 그려서 이미지와 좌표를 저장 (confidence threshold=0.3 적용)
-        print(run_bd(image_path, model, output_image_path, output_coords_path, visualize_image_path))
+        print(run_bd(image, model, output_image_path, output_coords_path, visualize_image_path))
         
     print("Processing completed for all images.")

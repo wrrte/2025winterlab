@@ -5,6 +5,7 @@ import os
 from run_dpt import run_dpt
 from run_bd import run_bd
 from ultralytics.models import YOLO
+import cv2
 
 import torch.multiprocessing as mp
 
@@ -33,17 +34,14 @@ def process_results(result_queue, func, *args):
 
 def GPS_dpt(model_path, record_dir, current_gps, heading, ref_distance, FOV):
     
-    pngs = [f for f in glob.glob(os.path.join(record_dir, '*.png'))]
-    image_file = max(pngs, key=os.path.getctime)
-
-    print(type(image_file))
+    image = cv2.VideoCapture(0)
 
     model=YOLO(model_path)
 
     #'''
-    depth_map = run_dpt(image_file) #모델 바꾸면 타입도 수정해야해!
+    depth_map = run_dpt(image) #모델 바꾸면 타입도 수정해야해!
     model=YOLO(model_path)
-    detection_points = run_bd(image_file, model)
+    detection_points = run_bd(image, model)
     #'''
 
     height, width = depth_map.shape[:2]
