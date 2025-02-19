@@ -11,9 +11,6 @@ model = YOLO(MODEL_PATH)
 F = 2007.113 # focal length
 B = 0.54 # baseline
 
-current_gps = (37.5665, 126.9780) # Replace with real gps
-heading = 180 # Replace with real heading
-
 left_cam = cv2.VideoCapture(0)
 right_cam = cv2.VideoCapture(1)
 
@@ -56,7 +53,11 @@ def process_frame(left_frame, right_frame):
             depths.append(depth)
     return left_boxes, depths
 
-def main(): 
+def main(current_gps, heading):
+
+    # current_gps = (37.5665, 126.9780) # Replace with real gps
+    # heading = 180 # Replace with real heading
+    
     while True:
         # Capture frames
         ret_left, left_frame = left_cam.read()
@@ -70,7 +71,7 @@ def main():
         
         if left_boxes is None or depths is None:
             yield None, None, None
-            continue  # Skip this frame and move to the next one
+            continue
 
         gps_results = []
         for (x_min, y_min, x_max, y_max), depth in zip(left_boxes, depths):
@@ -78,22 +79,18 @@ def main():
             angle = (target_x - 320) / 320 * 35  # Assuming 640px width and 70-degree FOV
             gps_coordinates = calculate_gps_coordinates(current_gps, heading, angle, depth)
             gps_results.append((gps_coordinates, (x_min, y_min, x_max, y_max), depth))
-      
+        
                 
-        yield left_frame, left_boxes, gps_coordinates
-    
-        # Press 'q' to exit
+        yield left_frame, left_boxes, gps_results
+
+        # Press 'q' to quit
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-
-
-print("Model run completed successfully.")
-
-# Release the camera resources
-left_cam.release()
-right_cam.release()
-cv2.destroyAllWindows()
+    # Release the camera resources
+    left_cam.release()
+    right_cam.release()
+    cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     for frame, boxes, gps in main():
