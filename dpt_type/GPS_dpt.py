@@ -13,45 +13,14 @@ import torch.multiprocessing as mp
 
 os.environ["CUDA_VISIBLE_DEVICES"]="3" # 0, 1
 
-def calculate_absolute_distance_for_point(depth_map, ref_distance, ref_point, target_point):
-    # 기준점과 목표점의 깊이 값 가져오기
-
-    print(depth_map.shape)
-    print(ref_point)
-    ref_depth_value = depth_map[ref_point[1], ref_point[0]]
-
-    print(depth_map[ref_point[1]-50:ref_point[1]+50, ref_point[0]-50:ref_point[0]+50])
-
-
-    target_depth_value = depth_map[int(target_point[1]), int(target_point[0])]
-
-    # 깊이 값이 0이거나 NaN인 경우 예외 처리
-    #if ref_depth_value <= 0 or np.isnan(ref_depth_value) or target_depth_value <= 0 or np.isnan(target_depth_value):
-    #    return None  # 거리 계산 불가능한 경우
-
-    # 기준 깊이 값과 거리의 비율을 계산 (비례 관계)
-    ratio = ref_distance / ref_depth_value
-
-    print("\n\n\n", ref_distance, ref_depth_value, '\n\n\n')
-
-    return target_depth_value
-
-    # 목표점의 절대 거리 계산
-    absolute_distance = target_depth_value * ratio
+def calculate_angle_and_distance(depth_map, image_width, max_depth_value, ratio, target_point, FOV):
     
-    return absolute_distance
-
-def calculate_angle_and_distance(image_width, image_height, target_x, target_y, depth_map, ref_distance, ref_point, FOV):
     cx = image_width // 2
-    dx = target_x - cx
+    dx = target_point[0] - cx
     theta = (dx / (image_width / 2)) * (FOV / 2)
     
-    absolute_distance = calculate_absolute_distance_for_point(
-        depth_map, 
-        ref_distance, 
-        ref_point, 
-        (target_x, target_y)
-    )
+    target_depth_value = depth_map[int(target_point[1]), int(target_point[0])]
+    absolute_distance = np.abs(((max_depth_value - target_depth_value) * ratio))**3
     
     return theta, absolute_distance
 
@@ -60,24 +29,6 @@ def calculate_gps_coordinates(current_gps, heading, angle, distance):
     origin = geopy.Point(current_gps[0], current_gps[1])
     destination = geopy.distance.distance(meters=distance).destination(origin, actual_angle)
     return destination.latitude, destination.longitude
-
-def get_latest_reference_point(record_dir):
-    txt_files = [f for f in glob.glob(os.path.join(record_dir, 'reference_point', '*.txt'))]
-    if not txt_files:
-        print(f"No reference points found in: {record_dir}")
-        return None
-
-    latest_txt_file = max(txt_files, key=os.path.getctime)
-    print(f"Most recent text file: {latest_txt_file}")
-
-    with open(latest_txt_file, 'r') as file:
-        line = file.readline()
-        match = re.search(r"5m point at \((\d+), (\d+)\)", line)
-        if match:
-            reference_x, reference_y = map(int, match.groups())
-            return (reference_x, reference_y)
-    return None
-
 
 def dpt_process(q, image_file):
     depth_map = run_dpt(image_file)  # DPT 실행
@@ -90,13 +41,10 @@ def bd_process(q, image_file):
 
 
 def GPS_dpt(record_dir, current_gps, heading, ref_distance, FOV):
+
     
-    ref_point = get_latest_reference_point(record_dir)
-    if ref_point is None:
-        print("Reference point not found.")
-        return []
     
-    pngs = [f for f in glob.glob(os.path.join(record_dir, 'image', '*.png'))]
+    pngs = [f for f in glob.glob(os.path.join(record_dir, '*.png'))]
     image_file = max(pngs, key=os.path.getctime)
 
     depth_map = run_dpt(image_file)
@@ -122,15 +70,18 @@ def GPS_dpt(record_dir, current_gps, heading, ref_distance, FOV):
     '''
 
     height, width = depth_map.shape[:2]
+
+    ref_depth_value = depth_map[int(width/2), int(height*7/8)]
+    max_depth_value = np.max(depth_map)
+    
+    # Calculate ratio using reference point
+    ratio = ref_distance / (ref_depth_value - max_depth_value)
     
     predicted_gps_points = []
     for point in detection_points:
-        target_x, target_y = point
         
         angle, distance = calculate_angle_and_distance(
-            width, height, target_x, target_y, 
-            depth_map, ref_distance, ref_point, FOV
-        )
+            depth_map, width, max_depth_value, ratio, point, FOV)
 
         predicted_gps = calculate_gps_coordinates(current_gps, heading, angle, distance)
         predicted_gps_points.append((predicted_gps, angle, distance))
@@ -142,7 +93,7 @@ current_gps = (37.5665, 126.9780)  # Current GPS position (latitude, longitude)
 heading = 180  # Camera heading (180 degrees)
 reference_distance = 5.0  # Reference point actual distance (meters)
 FOV = 72  # Field of view 72 degrees
-record_dir = 'roadview/'  # Text files folder path
+record_dir = 'roadview/left'  # Text files folder path
 
 #mp.set_start_method('spawn')  # GPU 자원 공유를 위해 spawn 방식 사용
 
