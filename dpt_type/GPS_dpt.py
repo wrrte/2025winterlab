@@ -1,10 +1,7 @@
 import numpy as np
-import math
 import geopy.distance
-import re
 import glob
 import os
-import time
 from run_dpt import run_dpt
 from run_bd import run_bd
 from ultralytics.models import YOLO
@@ -30,44 +27,24 @@ def calculate_gps_coordinates(current_gps, heading, angle, distance):
     destination = geopy.distance.distance(meters=distance).destination(origin, actual_angle)
     return destination.latitude, destination.longitude
 
-def dpt_process(q, image_file):
-    depth_map = run_dpt(image_file)  # DPT 실행
-    q.put(depth_map)
+def process_results(result_queue, func, *args):
+    result = func(*args)
+    result_queue.put(result)
 
-def bd_process(q, image_file):
-    model=YOLO("/mnt/hdd_4A/choemj/2025winterlab/type_30000/weight/train/weights/best.pt")
-    detection_points = run_bd(image_file, model)
-    q.put(detection_points)
-
-
-def GPS_dpt(record_dir, current_gps, heading, ref_distance, FOV):
-
-    
+def GPS_dpt(model_path, record_dir, current_gps, heading, ref_distance, FOV):
     
     pngs = [f for f in glob.glob(os.path.join(record_dir, '*.png'))]
     image_file = max(pngs, key=os.path.getctime)
 
-    depth_map = run_dpt(image_file)
-    model=YOLO("/mnt/hdd_4A/choemj/2025winterlab/type_30000/weight/train/weights/best.pt")
+    print(type(image_file))
+
+    model=YOLO(model_path)
+
+    #'''
+    depth_map = run_dpt(image_file) #모델 바꾸면 타입도 수정해야해!
+    model=YOLO(model_path)
     detection_points = run_bd(image_file, model)
-
-    '''
-    q = mp.Queue()
-
-    # 병렬 프로세스 실행
-    p1 = mp.Process(target=dpt_process, args=(q, image_file))
-    p2 = mp.Process(target=bd_process, args=(q, image_file, model))
-
-    p1.start()
-    p2.start()
-
-    # 결과 가져오기
-    depth_map = q.get()
-    detection_points = q.get()
-
-    p1.join()
-    p2.join()
-    '''
+    #'''
 
     height, width = depth_map.shape[:2]
 
@@ -94,11 +71,12 @@ heading = 180  # Camera heading (180 degrees)
 reference_distance = 5.0  # Reference point actual distance (meters)
 FOV = 72  # Field of view 72 degrees
 record_dir = 'roadview/left'  # Text files folder path
+model_path = "/mnt/hdd_4A/choemj/2025winterlab/type_30000/weight/train/weights/best.pt"
 
 #mp.set_start_method('spawn')  # GPU 자원 공유를 위해 spawn 방식 사용
 
 predicted_gps_points = GPS_dpt(
-    record_dir,
+    model_path, record_dir,
     current_gps, heading, reference_distance, FOV
 )
 

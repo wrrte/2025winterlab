@@ -3,10 +3,10 @@ from ultralytics.models import YOLO
 import glob
 import os
 import argparse
+import torch
 
 def run_bd(image_path, model, output_image_path = 'dpt_type/bd_output/image/result.png', output_coords_path='dpt_type/bd_output/coordinate/result.txt', visualize_image_path='dpt_type/bd_output/visualize/result.png', confidence_threshold=0.3):
-    
-    
+
     results = model(image_path, imgsz=640)
 
     image = cv2.imread(image_path)

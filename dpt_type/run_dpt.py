@@ -19,7 +19,7 @@ import numpy as np
 #from util.misc import visualize_attention
 
 
-def run_dpt(input_file, model_path = "weights/dpt_hybrid/dpt_large-midas-2f21e586.pt", model_type="dpt_large", optimize=True):
+def run_dpt(input_file, model_path = "/mnt/hdd_4A/choemj/2025winterlab/weights/dpt_hybrid/dpt_monodepth.pt", model_type="dpt_monodepth", optimize=True):
     """Run MonoDepthNN to compute depth maps.
 
     Args:
@@ -112,20 +112,13 @@ def run_dpt(input_file, model_path = "weights/dpt_hybrid/dpt_large-midas-2f21e58
 
     model.to(device)
 
-    # get input
-    latest_imgs = glob.glob(input_file)
-    latest_img = max(latest_imgs, key=os.path.getctime)
-
-    print(latest_img)
-
-    print("start processing")
-
-    #print(f"  processing {latest_img} ({ind + 1}/{num_images})")
-    img = util.io.read_image(latest_img)
+    #print(f"  processing {input_file} ({ind + 1}/{num_images})")
+    img = util.io.read_image(input_file)
+    print("img type", type(img))
 
     # 디버깅 코드 추가: 입력 이미지 확인
     if img is None:
-        raise ValueError(f"Input image at {latest_img} could not be loaded!")
+        raise ValueError(f"Input image at {input_file} could not be loaded!")
     #print(f"Input image shape: {img.shape}, range: [{img.min()}, {img.max()}]")
 
     if model_type == "dpt_kitti" and args.kitti_crop:
