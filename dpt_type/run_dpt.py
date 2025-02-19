@@ -19,7 +19,7 @@ import numpy as np
 #from util.misc import visualize_attention
 
 
-def run_dpt(input_file, output_path = 'dpt_type/dpt_output/', model_path = "weights/dpt_hybrid/dpt_monodepth.pt", model_type="dpt_monodepth", optimize=True):
+def run_dpt(input_file, model_path = "weights/dpt_hybrid/dpt_large-midas-2f21e586.pt", model_type="dpt_large", optimize=True):
     """Run MonoDepthNN to compute depth maps.
 
     Args:
@@ -37,7 +37,17 @@ def run_dpt(input_file, output_path = 'dpt_type/dpt_output/', model_path = "weig
     print(f"device: {device}")
 
     # load network
-    if model_type == "dpt_monodepth":
+    if model_type == "dpt_large":  # DPT-Large
+        net_w = net_h = 384
+        model = DPTDepthModel(
+            path=model_path,
+            backbone="vitl16_384",
+            non_negative=True,
+            enable_attention_hooks=False,
+        )
+        normalization = NormalizeImage(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+
+    elif model_type == "dpt_monodepth":
         net_w, net_h = 384, 384
         model = DPTDepthModel(
             path=model_path,
@@ -108,9 +118,6 @@ def run_dpt(input_file, output_path = 'dpt_type/dpt_output/', model_path = "weig
 
     print(latest_img)
 
-    # create output folder
-    os.makedirs(output_path, exist_ok=True)
-
     print("start processing")
 
     #print(f"  processing {latest_img} ({ind + 1}/{num_images})")
@@ -160,10 +167,6 @@ def run_dpt(input_file, output_path = 'dpt_type/dpt_output/', model_path = "weig
         if model_type == "dpt_nyu":
             prediction *= 1000.0
 
-    print("finished")
-
-    print(prediction.shape)
-
     return prediction
 
     
@@ -171,6 +174,8 @@ def run_dpt(input_file, output_path = 'dpt_type/dpt_output/', model_path = "weig
 
 
 if __name__ == "__main__":
+
+    os.environ["CUDA_VISIBLE_DEVICES"]="3" # 0, 1
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -220,11 +225,28 @@ if __name__ == "__main__":
     torch.backends.cudnn.enabled = True
     torch.backends.cudnn.benchmark = True
 
+    input_file = "roadview/image/*.png"
+
     # compute depth maps
-    run(
-        args.input_path,
-        args.output_path,
+    prediction = run_dpt(
+        input_file,
         args.model_weights,
         args.model_type,
         args.optimize,
     )
+
+    min_val = np.min(prediction)
+    max_val = np.max(prediction)
+    
+    if max_val - min_val > 0:  # 최대값과 최소값이 같으면 정규화 불가능
+        scaled = (prediction - min_val) / (max_val - min_val)  # 0~1로 정규화
+    else:
+        scaled = np.zeros_like(prediction)  # 모든 값이 같다면 0으로 채움
+
+    # 2. 0~255로 변환 후 uint8 타입으로 변경
+    scaled = (scaled * 255).astype(np.uint8)
+
+    # 3. PNG로 저장
+    cv2.imwrite("dpt_type/dpt_output/result.png", scaled)
+
+    print(f"Saved depth map as dpt_type/dpt_output/result.png")

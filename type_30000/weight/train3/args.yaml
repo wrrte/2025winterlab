@@ -1,6 +1,6 @@
 task: detect
 mode: train
-model: /mnt/hdd_4A/choemj/2025winterlab/type_origin/weights/bd_pretrained/yolo11m.pt
+model: /mnt/hdd_4A/choemj/2025winterlab/type_origin/weights/bd_trained/train_m/weights/best.pt
 data: yolov11.yaml
 epochs: 2000
 time: null
@@ -12,7 +12,7 @@ save_period: -1
 cache: false
 device: null
 workers: 8
-project: /mnt/hdd_4A/choemj/2025winterlab/type_30000/weight
+project: weight
 name: train3
 exist_ok: false
 pretrained: true
@@ -103,4 +103,4 @@ erasing: 0.4
 crop_fraction: 1.0
 cfg: null
 tracker: botsort.yaml
-save_dir: /mnt/hdd_4A/choemj/2025winterlab/type_30000/weight/train3
+save_dir: weight/train3

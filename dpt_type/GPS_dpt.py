@@ -11,19 +11,33 @@ from ultralytics.models import YOLO
 
 import torch.multiprocessing as mp
 
-
+os.environ["CUDA_VISIBLE_DEVICES"]="3" # 0, 1
 
 def calculate_absolute_distance_for_point(depth_map, ref_distance, ref_point, target_point):
-    # Get depth values for reference and target points
+    # 기준점과 목표점의 깊이 값 가져오기
+
+    print(depth_map.shape)
+    print(ref_point)
     ref_depth_value = depth_map[ref_point[1], ref_point[0]]
-    max_depth_value = np.max(depth_map)
+
+    print(depth_map[ref_point[1]-50:ref_point[1]+50, ref_point[0]-50:ref_point[0]+50])
+
+
     target_depth_value = depth_map[int(target_point[1]), int(target_point[0])]
-    
-    # Calculate ratio using reference point
-    ratio = ref_distance / (ref_depth_value - max_depth_value)
-    
-    # Calculate absolute distance for target point
-    absolute_distance = np.abs(((max_depth_value - target_depth_value) * ratio))**3
+
+    # 깊이 값이 0이거나 NaN인 경우 예외 처리
+    #if ref_depth_value <= 0 or np.isnan(ref_depth_value) or target_depth_value <= 0 or np.isnan(target_depth_value):
+    #    return None  # 거리 계산 불가능한 경우
+
+    # 기준 깊이 값과 거리의 비율을 계산 (비례 관계)
+    ratio = ref_distance / ref_depth_value
+
+    print("\n\n\n", ref_distance, ref_depth_value, '\n\n\n')
+
+    return target_depth_value
+
+    # 목표점의 절대 거리 계산
+    absolute_distance = target_depth_value * ratio
     
     return absolute_distance
 
@@ -76,7 +90,6 @@ def bd_process(q, image_file):
 
 
 def GPS_dpt(record_dir, current_gps, heading, ref_distance, FOV):
-    global inference_time
     
     ref_point = get_latest_reference_point(record_dir)
     if ref_point is None:
@@ -86,11 +99,16 @@ def GPS_dpt(record_dir, current_gps, heading, ref_distance, FOV):
     pngs = [f for f in glob.glob(os.path.join(record_dir, 'image', '*.png'))]
     image_file = max(pngs, key=os.path.getctime)
 
+    depth_map = run_dpt(image_file)
+    model=YOLO("/mnt/hdd_4A/choemj/2025winterlab/type_30000/weight/train/weights/best.pt")
+    detection_points = run_bd(image_file, model)
+
+    '''
     q = mp.Queue()
 
     # 병렬 프로세스 실행
     p1 = mp.Process(target=dpt_process, args=(q, image_file))
-    p2 = mp.Process(target=bd_process, args=(q, image_file))
+    p2 = mp.Process(target=bd_process, args=(q, image_file, model))
 
     p1.start()
     p2.start()
@@ -101,6 +119,7 @@ def GPS_dpt(record_dir, current_gps, heading, ref_distance, FOV):
 
     p1.join()
     p2.join()
+    '''
 
     height, width = depth_map.shape[:2]
     
@@ -121,11 +140,9 @@ def GPS_dpt(record_dir, current_gps, heading, ref_distance, FOV):
 # Example usage
 current_gps = (37.5665, 126.9780)  # Current GPS position (latitude, longitude)
 heading = 180  # Camera heading (180 degrees)
-reference_distance = 2.5  # Reference point actual distance (meters)
+reference_distance = 5.0  # Reference point actual distance (meters)
 FOV = 72  # Field of view 72 degrees
 record_dir = 'roadview/'  # Text files folder path
-
-inference_time = []
 
 #mp.set_start_method('spawn')  # GPU 자원 공유를 위해 spawn 방식 사용
 
