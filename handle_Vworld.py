@@ -7,15 +7,24 @@ import glob
 import os
 from geopy.distance import geodesic
 from PIL import Image, ImageDraw, ImageFont
+from dpt_type.GPS_dpt import GPS_dpt
+from type_stereo/run_stereo import main as GPS_stereo
 
 
-dpt_type = "pfm"
-#dpt_type = "stereo"
+predict_type = "dpt"
+#predict_type = "stereo"
 
 # gps_est.py 스크립트를 실행하고 출력을 캡처
-print("Running calculate_GPS.py to get estimated GPS coordinates...\n")
-#result = subprocess.run(["python3", "calculate_GPS.py", dpt_type], capture_output=True, text=True)
-result = subprocess.run(["python3", "calculate_GPS_indivisual.py"], capture_output=True, text=True)
+print(f"Running {predict_type}\n")
+
+run
+
+if predict_type == "dpt":
+    While True:
+        image, detection_points, predicted_gps_points = GPS_dpt()
+else:
+    While True:
+        result = GPS_stereo()
 
 # 출력된 내용을 문자열로 가져옴
 output = result.stdout
