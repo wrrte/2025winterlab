@@ -47,7 +47,7 @@ def run_bd(image, model, output_image_path = 'dpt_type/bd_output/image/result.pn
                 #detection_points.append((x_center, (y_max+y_center)/2))
 
                 #중심 좌표 출력
-                detection_points.append((x_center, y_center))
+                detection_points.append((x_min, y_min, x_max, y_max))
 
     
     # 결과 이미지를 지정된 경로에 저장

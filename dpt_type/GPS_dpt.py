@@ -53,15 +53,17 @@ def GPS_dpt(model_path, cap, current_gps, heading, ref_distance, FOV):
     ratio = ref_distance / (ref_depth_value - max_depth_value)
     
     predicted_gps_points = []
-    for point in detection_points:
+    for x_min, y_min, x_max, y_max in detection_points:
+
+        point = ((x_min+x_max)/2, (y_min+y_max)/2)
         
         angle, distance = calculate_angle_and_distance(
             depth_map, width, max_depth_value, ratio, point, FOV)
 
         predicted_gps = calculate_gps_coordinates(current_gps, heading, angle, distance)
-        predicted_gps_points.append((predicted_gps, angle, distance))
+        predicted_gps_points.append(predicted_gps)
 
-    return predicted_gps_points
+    return image, detection_points, predicted_gps_points
 
 if __name__ == "__main__":
 
@@ -78,11 +80,10 @@ if __name__ == "__main__":
     cap = cv2.VideoCapture(0)
     print(cap.isOpened())
 
-    predicted_gps_points = GPS_dpt(
-        model_path, cap,
-        current_gps, heading, reference_distance, FOV
-    )
+    
+    while True:
+        image, detection_points, predicted_gps_points = GPS_dpt(
+            model_path, cap, current_gps, heading, reference_distance, FOV)
+        
 
-    # Print results
-    for i, (gps, angle, distance) in enumerate(predicted_gps_points):
-        print(f"Detection point {i+1} predicted GPS coordinates: {gps}, angle: {angle:.2f}°, distance: {distance:.2f}m")
+
