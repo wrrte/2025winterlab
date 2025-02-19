@@ -1,71 +1,39 @@
 import cv2
 from ultralytics.models import YOLO
-import glob
-import os
-import numpy as np
+import geopy.distance
 
 # GPU 연결 코드
 
-MODEL_PATH = "/home/seyeon/2025winterlab/type_seyeon/weights/bd_trained/train10/weights/last.pt"
+MODEL_PATH = "/home/seyeon/2025winterlab/type_stereo/test/best.pt"
 model = YOLO(MODEL_PATH)
 
 # Depth calculation constants
-F = 1 # focal length
-B = 1 # baseline
+F = 2007.113 # focal length
+B = 0.54 # baseline
 
-def draw_bounding_boxes(image_path, results, output_coords_path, confidence_threshold=0.3):
-    image = cv2.imread(image_path)
+current_gps = (37.5665, 126.9780) # Replace with real gps
+heading = 180 # Replace with real heading
+
+left_cam = cv2.VideoCapture(0)
+right_cam = cv2.VideoCapture(1)
+
+# # Camera resolution setting
+# left_cam.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+
+def calculate_gps_coordinates(current_gps, heading, angle, distance):
+    actual_angle = (heading + angle) % 360
+    origin = geopy.Point(current_gps[0], current_gps[1])
+    destination = geopy.distance.distance(meters=distance).destination(origin, actual_angle)
+    return destination.latitude, destination.longitude
+
+def process_frame(left_frame, right_frame):
+    left_results = model(left_frame)
+    right_results = model(right_frame)
+
+    left_boxes = left_results[0].boxes.xyxy.cpu().numpy()  # 바운딩 박스 좌표
+    right_boxes = right_results[0].boxes.xyxy.cpu().numpy()  # 바운딩 박스 좌표
     
-    bounding_boxes = results[0].boxes.xyxy.cpu().numpy()  # 바운딩 박스 좌표
-    confidences = results[0].boxes.conf.cpu().numpy()     # 신뢰도
-    valid_boxes = []
-    
-    if output_coords_path is not None:
-        with open(output_coords_path, 'w') as f:
-            for bbox, conf in zip(bounding_boxes, confidences):
-                if conf >= confidence_threshold:
-                    x_min, y_min, x_max, y_max = bbox
-                    cv2.rectangle(image, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (255, 0, 0), 2)
-                    valid_boxes.append([x_min, y_min, x_max, y_max])
-                    f.write(" ".join(map(str, [x_min, y_min, x_max, y_max])) + "\n")
-
-    else:
-        for bbox, conf in zip(bounding_boxes, confidences):
-            if conf >= confidence_threshold:
-                x_min, y_min, x_max, y_max = bbox
-                valid_boxes.append([x_min, y_min, x_max, y_max])
-
-    return image, valid_boxes
-
- 
-left_imgs = sorted(glob.glob("/home/seyeon/2025winterlab/type_seyeon/test/test_left/*.png")) # 왼쪽 카메라 dir
-right_imgs = sorted(glob.glob("/home/seyeon/2025winterlab/type_seyeon/test/test_right/*.png")) # 오른쪽 카메라 dir
-
-if not left_imgs or len(left_imgs) != len(right_imgs):
-    print("Missing images or missmatch in the input images.")
-    exit(1)
-
-output_dir = "/home/seyeon/2025winterlab/type_seyeon/test/test_results" # 경로
-os.makedirs(f"{output_dir}/images", exist_ok=True)
-os.makedirs(f"{output_dir}/coordinates", exist_ok=True)
-os.makedirs(f"{output_dir}/disparity", exist_ok=True)
-os.makedirs(f"{output_dir}/depth", exist_ok=True)
-
-# 이미지 파일 처리
-for left_img_path, right_img_path in zip(left_imgs, right_imgs):
-    base_filename = os.path.basename(left_img_path)
-
-
-    batch_results = model([left_img_path, right_img_path], device = "cuda")
-    left_results, right_results = batch_results
-
-    left_img, left_boxes = draw_bounding_boxes(left_img_path, left_results, f"{output_dir}/coordinates/{base_filename}.txt")
-    cv2.imwrite(f"{output_dir}/images/{base_filename}", left_img)
-
-    # Get bounding boxes for RIGHT image (used only for matching)
-    _, right_boxes = draw_bounding_boxes(right_img_path, right_results, None)  # Not saving right coords
-
-    # match buildings in pairs
+    # Match left/right bboxes
     disparities = []
     depths = []
 
@@ -86,13 +54,51 @@ for left_img_path, right_img_path in zip(left_imgs, right_imgs):
             depth = (F * B) / max(disparity, 1e-6)
             disparities.append(disparity)
             depths.append(depth)
+    return left_boxes, depths
 
-    # Save disparity values
-    with open(f"{output_dir}/disparity/{base_filename}.txt", "w") as disp_file:
-        disp_file.write("\n".join(map(str, disparities)))
+def main(): 
+    while True:
+        # Capture frames
+        ret_left, left_frame = left_cam.read()
+        ret_right, right_frame = right_cam.read()
 
-    # Save depth values
-    with open(f"{output_dir}/depth/{base_filename}.txt", "w") as depth_file:
-        depth_file.write("\n".join(map(str, depths)))
+        if not ret_left or not ret_right:
+            print("Error: Unable to capture frames from cameras")
+            break
 
-    print("Model run completed successfully.")
+        left_boxes, depths = process_frame(left_frame, right_frame) # 메인함수 실행
+        
+        if left_boxes is None or depths is None:
+            yield None, None, None
+            continue  # Skip this frame and move to the next one
+
+        gps_results = []
+        for (x_min, y_min, x_max, y_max), depth in zip(left_boxes, depths):
+            target_x = (x_min + x_max) / 2
+            angle = (target_x - 320) / 320 * 35  # Assuming 640px width and 70-degree FOV
+            gps_coordinates = calculate_gps_coordinates(current_gps, heading, angle, depth)
+            gps_results.append((gps_coordinates, (x_min, y_min, x_max, y_max), depth))
+      
+                
+        yield left_frame, left_boxes, gps_coordinates
+    
+        # Press 'q' to exit
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+
+
+print("Model run completed successfully.")
+
+# Release the camera resources
+left_cam.release()
+right_cam.release()
+cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    for frame, boxes, gps in main():
+        if frame is None:
+            print("No buildings detected in this frame.")
+        else:
+            print(f"Bounding Boxes: {boxes}")
+            print(f"GPS Coordinates: {gps}")

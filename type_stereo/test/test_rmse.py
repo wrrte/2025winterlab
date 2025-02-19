@@ -6,7 +6,7 @@ from sklearn.metrics import mean_squared_error
 import numpy as np
 
 
-MODEL_PATH = "/home/seyeon/2025winterlab/type_seyeon/weights/bd_trained/train10/weights/best.pt"
+MODEL_PATH = "/home/seyeon/2025winterlab/type_stereo/test/best.pt"
 model = YOLO(MODEL_PATH)
 
 # Depth calculation constants
@@ -38,20 +38,20 @@ def draw_bounding_boxes(image_path, results, output_coords_path, confidence_thre
     return image, valid_boxes
 
  
-left_imgs = sorted(glob.glob("/home/seyeon/2025winterlab/type_seyeon/test/test_left/*.png"))
-right_imgs = sorted(glob.glob("/home/seyeon/2025winterlab/type_seyeon/test/test_right/*.png"))
-depth_gt_imgs = sorted(glob.glob("/home/seyeon/2025winterlab/type_seyeon/test/test_depth/*.png"))
-disparity_gt_imgs = sorted(glob.glob("/home/seyeon/2025winterlab/type_seyeon/test/test_disparity/*.png"))
+left_imgs = sorted(glob.glob("/home/seyeon/2025winterlab/type_stereo/test/test_left/*.png"))
+right_imgs = sorted(glob.glob("/home/seyeon/2025winterlab/type_stereo/test/test_right/*.png"))
+depth_gt_imgs = sorted(glob.glob("/home/seyeon/2025winterlab/type_stereo/test/test_depth/*.png"))
+disparity_gt_imgs = sorted(glob.glob("/home/seyeon/2025winterlab/type_stereo/test/test_disparity/*.png"))
 
 if not left_imgs:
     print("No images found in the test_left folder.")
     exit(1)
 
-if not depth_gt_imgs:
-    print("No images found in the test_depth folder.")
-    exit(1)
+# if not depth_gt_imgs:
+#     print("No images found in the test_depth folder.")
+#     exit(1)
 
-output_dir = "/home/seyeon/2025winterlab/type_seyeon/test/test_results"
+output_dir = "/home/seyeon/2025winterlab/type_stereo/test/test_results"
 os.makedirs(f"{output_dir}/images", exist_ok=True)
 os.makedirs(f"{output_dir}/coordinates", exist_ok=True)
 os.makedirs(f"{output_dir}/disparity", exist_ok=True)
