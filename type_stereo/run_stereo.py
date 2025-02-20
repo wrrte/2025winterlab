@@ -54,9 +54,6 @@ def process_frame(left_frame, right_frame):
     return left_boxes, depths
 
 def main(current_gps, heading):
-
-    # current_gps = (37.5665, 126.9780) # Replace with real gps
-    # heading = 180 # Replace with real heading
     
     while True:
         # Capture frames
