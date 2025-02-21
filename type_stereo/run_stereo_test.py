@@ -6,11 +6,12 @@ import numpy as np
 
 # GPU 연결 코드
 
-MODEL_PATH = "/home/seyeon/2025winterlab/type_stereo/test/best.pt"
+MODEL_PATH = "/home/seyeon/2025winterlab/type_stereo/best.pt"
 model = YOLO(MODEL_PATH)
 
 # Depth calculation constants
-F = 2007.113 # focal length
+# F = 2007.113 # focal length
+F = 1620
 B = 0.54 # baseline
 
 def draw_bounding_boxes(image_path, results, output_coords_path, confidence_threshold=0.3):
