@@ -73,7 +73,7 @@ if __name__ == "__main__":
     # Example usage
     current_gps = (37.5665, 126.9780)  # Current GPS position (latitude, longitude)
     heading = 180  # Camera heading (180 degrees)
-    reference_distance = 5.0  # Reference point actual distance (meters)
+    reference_distance = 10.4054  # Reference point actual distance (meters)
     FOV = 72  # Field of view 72 degrees
     record_dir = 'roadview/left'  # Text files folder path
     model_path = "/mnt/hdd_4A/choemj/2025winterlab/type_30000/weight/train/weights/best.pt"
