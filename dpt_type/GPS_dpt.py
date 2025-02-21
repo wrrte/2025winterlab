@@ -6,6 +6,7 @@ from run_dpt import run_dpt
 from run_bd import run_bd
 from ultralytics.models import YOLO
 import cv2
+import torch
 
 import torch.multiprocessing as mp
 
@@ -66,6 +67,8 @@ def GPS_dpt(model_path, cap, current_gps, heading, ref_distance, FOV):
     return image, detection_points, predicted_gps_points
 
 if __name__ == "__main__":
+
+    print(torch.__version__)
 
     # Example usage
     current_gps = (37.5665, 126.9780)  # Current GPS position (latitude, longitude)

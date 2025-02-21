@@ -1,11 +1,11 @@
 task: detect
 mode: train
-model: /mnt/hdd_4A/choemj/2025winterlab/type_origin/weights/bd_pretrained/yolo11n.pt
+model: /mnt/hdd_4A/choemj/2025winterlab/type_origin/weights/bd_trained/train_l/weights/best.pt
 data: yolov11.yaml
 epochs: 2000
 time: null
 patience: 100
-batch: 128
+batch: 32
 imgsz: 640
 save: true
 save_period: -1

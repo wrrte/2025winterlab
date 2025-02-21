@@ -228,6 +228,8 @@ if __name__ == "__main__":
         args.optimize,
     )
 
+    '''
+
     min_val = np.min(prediction)
     max_val = np.max(prediction)
     
@@ -243,3 +245,4 @@ if __name__ == "__main__":
     cv2.imwrite("dpt_type/dpt_output/result.png", scaled)
 
     print(f"Saved depth map as dpt_type/dpt_output/result.png")
+    '''
