@@ -19,7 +19,7 @@ def calculate_angle_and_distance(depth_map, image_width, max_depth_value, ratio,
     theta = (dx / (image_width / 2)) * (FOV / 2)
     
     target_depth_value = depth_map[int(target_point[1]), int(target_point[0])]
-    absolute_distance = np.abs(((max_depth_value - target_depth_value) * ratio))**3
+    absolute_distance = np.abs(((max_depth_value - target_depth_value) * ratio))**1.6
     
     return theta, absolute_distance
 
@@ -47,11 +47,11 @@ def GPS_dpt(model_path, cap, current_gps, heading, ref_distance, FOV):
 
     height, width = depth_map.shape[:2]
 
-    ref_depth_value = depth_map[int(width/2), int(height*7/8)]
+    ref_depth_value = depth_map[int(height*7/8), int(width/2)]
     max_depth_value = np.max(depth_map)
     
     # Calculate ratio using reference point
-    ratio = ref_distance / (ref_depth_value - max_depth_value)
+    ratio = ref_distance / (max_depth_value - ref_depth_value)
     
     predicted_gps_points = []
     for x_min, y_min, x_max, y_max in detection_points:

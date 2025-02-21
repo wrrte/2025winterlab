@@ -99,7 +99,6 @@ def run_dpt(img, model_path = "/mnt/hdd_4A/choemj/2025winterlab/weights/dpt_hybr
                 resize_method="minimal",
                 image_interpolation_method=cv2.INTER_CUBIC,
             ),
-            normalization,
             PrepareForNet(),
         ]
     )

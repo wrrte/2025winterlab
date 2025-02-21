@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 
 import torch.multiprocessing as mp
 
+from matplotlib.colors import PowerNorm
+
 os.environ["CUDA_VISIBLE_DEVICES"]="3" # 0, 1
 
 def calculate_absolute_distance_for_point(depth_map, ref_distance):
@@ -26,7 +28,7 @@ def calculate_absolute_distance_for_point(depth_map, ref_distance):
 
     print("ratio :", ratio)
 
-    absolute_distances = np.abs((max_depth_value-depth_map)*ratio)
+    absolute_distances = np.abs((max_depth_value-depth_map)*ratio)**1.6
 
     return absolute_distances
 
@@ -82,25 +84,27 @@ def GPS_dpt(record_dir, ref_distance, FOV):
         
         print(np.min(distance), np.max(distance))
         
-        distance = np.nan_to_num(distance, nan=0.0, posinf=255.0, neginf=0.0)
+        distance = np.nan_to_num(distance, nan=0.0, posinf=1000.0, neginf=0.0)
 
         min_val = np.min(distance)
         max_val = np.max(distance)
 
-        #distance = (distance - min_val) * (255 / (max_val-min_val))
+        
+        ##################################################
 
 
-        # 2. distance 값을 0~255 범위로 정규화
-        distance_norm = np.uint8(distance)  # 정수형 변환 (cv2 적용을 위해)
+        gamma = 0.5 # 작은 값 대비 증가
 
-        # 3. 컬러맵 적용 및 시각화
+        # 3. 컬러맵 적용 및 시각화 (원본 값 유지)
         plt.figure(figsize=(8, 6))
-        img = plt.imshow(distance_norm, cmap='plasma', interpolation='bilinear', aspect='auto')
+        img = plt.imshow(distance, cmap='plasma', interpolation='bilinear', aspect='auto', 
+                        norm=PowerNorm(gamma=gamma))  # 데이터는 그대로 두고 감마 보정만 적용
+
         cbar = plt.colorbar(img)
         cbar.set_label("Distance (meters)", fontsize=12)
-        
+
         # 4. 제목 및 축 설정
-        plt.title("Absolute Distance Map", fontsize=14)
+        plt.title("Absolute Distance Map (Gamma Corrected)", fontsize=14)
         plt.xlabel("X-axis (pixels)", fontsize=12)
         plt.ylabel("Y-axis (pixels)", fontsize=12)
 
