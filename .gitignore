@@ -8,5 +8,6 @@ type_stereo/test/test_depth
 type_stereo/test/test_disparity
 type_stereo/test/test_left
 type_stereo/test/test_right
+type_stereo/test/test_results
 weights/dpt_hybrid
 type_origin/test_dpt/dataset
