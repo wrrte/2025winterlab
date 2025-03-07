@@ -1,12 +1,3 @@
 .vscode/
-bd_output/
-dpt_output/
-type_origin/weights/bd_pretrained/yolo11x.pt
-type_origin/weights/bd_trained/train_x/weights
-GS1GEO/south-korea-latest.osm.pbf
-type_stereo/test/test_depth
-type_stereo/test/test_disparity
-type_stereo/test/test_left
-type_stereo/test/test_right
+type_stereo/test/
 weights/dpt_hybrid
-type_origin/test_dpt/dataset

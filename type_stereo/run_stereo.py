@@ -53,7 +53,7 @@ def process_frame(left_frame, right_frame, bd_model_path):
             depths.append(depth)
     return left_boxes, depths
 
-def main(current_gps, heading, bd_model_path):
+def main(current_gps, heading, bd_model_path, left_cam, right_cam):
 
     
     
