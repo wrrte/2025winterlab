@@ -4,8 +4,7 @@ import geopy.distance
 
 # GPU 연결 코드
 
-MODEL_PATH = "/home/seyeon/2025winterlab/type_stereo/test/best.pt"
-model = YOLO(MODEL_PATH)
+
 
 # Depth calculation constants
 F = 2007.113 # focal length
@@ -23,7 +22,8 @@ def calculate_gps_coordinates(current_gps, heading, angle, distance):
     destination = geopy.distance.distance(meters=distance).destination(origin, actual_angle)
     return destination.latitude, destination.longitude
 
-def process_frame(left_frame, right_frame):
+def process_frame(left_frame, right_frame, bd_model_path):
+    model = YOLO(bd_model_path)
     left_results = model(left_frame)
     right_results = model(right_frame)
 
@@ -53,7 +53,9 @@ def process_frame(left_frame, right_frame):
             depths.append(depth)
     return left_boxes, depths
 
-def main(current_gps, heading):
+def main(current_gps, heading, bd_model_path):
+
+    
     
     while True:
         # Capture frames
@@ -64,7 +66,7 @@ def main(current_gps, heading):
             print("Error: Unable to capture frames from cameras")
             break
 
-        left_boxes, depths = process_frame(left_frame, right_frame) # 메인함수 실행
+        left_boxes, depths = process_frame(left_frame, right_frame, bd_model_path) # 메인함수 실행
         
         if left_boxes is None or depths is None:
             yield None, None, None

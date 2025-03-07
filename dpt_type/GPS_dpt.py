@@ -33,15 +33,13 @@ def process_results(result_queue, func, *args):
     result = func(*args)
     result_queue.put(result)
 
-def GPS_dpt(model_path, cap, current_gps, heading, ref_distance, FOV):
-
-    model=YOLO(model_path)
+def GPS_dpt(bd_model_path, cap, current_gps, heading, ref_distance, FOV, dpt_model_path):
 
     ret, image = cap.read()
 
     #'''
-    depth_map = run_dpt(image) #모델 바꾸면 타입도 수정해야해!
-    model=YOLO(model_path)
+    depth_map = run_dpt(image, model_path=dpt_model_path) #모델 바꾸면 타입도 수정해야해!
+    model=YOLO(bd_model_path)
     detection_points = run_bd(image, model)
     #'''
 

@@ -22,7 +22,8 @@ heading = 180 # Replace with real heading
 # DPT settings
 ref_distance = 5.0
 FOV = 72
-model_path_dpt = "" # model dir
+bd_model_path = "/mnt/hdd_4A/choemj/2025winterlab/weights/bd/n_xloss/weights/best.pt" # model dir
+dpt_model_path = "/mnt/hdd_4A/choemj/2025winterlab/weights/dpt_hybrid/dpt_monodepth.pt"
 
 cap = cv2.VideoCapture(0)
 
@@ -30,10 +31,10 @@ cap = cv2.VideoCapture(0)
 while True:
     if predict_type == "dpt":
             image, detection_points, predicted_gps_points = GPS_dpt(
-                 model_path_dpt, cap, current_gps, heading, ref_distance, FOV
+                 bd_model_path, cap, current_gps, heading, ref_distance, FOV, dpt_model_path
                  )
     else:
-        for image, detection_points, predicted_gps_points in GPS_stereo(current_gps, heading):
+        for image, detection_points, predicted_gps_points in GPS_stereo(current_gps, heading, bd_model_path):
             break
     
     if image is None or not predicted_gps_points:
