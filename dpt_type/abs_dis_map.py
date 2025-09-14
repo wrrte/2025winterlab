@@ -65,8 +65,6 @@ def GPS_dpt(record_dir, ref_distance, FOV):
         img = util.io.read_image(image_file)
 
         depth_map = run_dpt(img)
-        model=YOLO("/mnt/hdd_4A/choemj/2025winterlab/type_30000/weight/train/weights/best.pt")
-
 
         height, width = depth_map.shape[:2]
 
@@ -93,7 +91,7 @@ def GPS_dpt(record_dir, ref_distance, FOV):
         ##################################################
 
 
-        gamma = 0.5 # 작은 값 대비 증가
+        gamma = 0.9 # 작은 값 대비 증가
 
         # 3. 컬러맵 적용 및 시각화 (원본 값 유지)
         plt.figure(figsize=(8, 6))
